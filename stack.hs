@@ -36,8 +36,8 @@ interpret str = let
                                "-" -> (-)
                                "*" -> (*)
                                "/" -> div
-                               in eval (¤) stack where
-                                                       eval (¤) stack' = 
+                               in eval (¤) stack where 
+                                                       eval (¤) stack' = -- TODO: refactor this method into a more general one: one which takes an arbitary binary operator, a stack, and uses the two operands at the top of the stack to evaluate it (or throws stack underflow if there aren't at least two elements on the stack.)
                                                          let x = head stack'
                                                              y = head $ pop stack'
                                                              res = x ¤ y
