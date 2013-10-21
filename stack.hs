@@ -6,8 +6,15 @@ underflow = "stack underflow!"
 pop [] = error underflow
 pop (x:xs) = xs
 
+-- See - Forth
 dup [] = error underflow
-dup (x:xs) = (x:x:xs)
+dup (x:xs) = x:x:xs
+
+-- See - Forth
+-- TODO: implement instead with more general word?
+swap [] = error underflow
+swap [_] = error underflow
+swap (x:y:xs) = y:x:xs
 
 type Token = String
 
