@@ -1,5 +1,5 @@
 import Data.Char (isDigit)
-import Data.List (words, all)
+import Data.List (words, any, all)
 
 underflow = "stack underflow!"
 
@@ -20,13 +20,21 @@ interpret str = let
                 in interpret' (tokens,[])
                    where 
                      interpret' :: ([Token],[Int]) -> Int
+                     interpret' ([],stack) = head stack
                      interpret' ((token:xs),stack)
                        | all isDigit token = let num = read token in interpret' (xs,(num:stack))
-                     interpret' ([],stack) = head stack
-                     interpret' (("+":xs),stack) = let x = head stack
-                                                       y = head $ pop stack
-                                                       res = x + y
-                                                       in interpret' (xs,(res:(pop $ pop stack)))
+                       | token == "+" || token == "-" || token == "*" || token == "/" = 
+                         let (¤) = case token of
+                               "+" -> (+)
+                               "-" -> (-)
+                               "*" -> (*)
+                               "/" -> div
+                               in eval (¤) stack where
+                                                       eval (¤) stack' = 
+                                                         let x = head stack'
+                                                             y = head $ pop stack'
+                                                             res = x ¤ y
+                                                         in interpret' (xs,(res:(pop $ pop stack')))
          
 
 
