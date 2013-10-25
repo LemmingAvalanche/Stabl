@@ -30,12 +30,13 @@ interpret str = let
                      interpret' ([],stack) = head stack
                      interpret' ((token:xs),stack)
                        | all isDigit token = let num = read token in interpret' (xs,(num:stack))
-                       | token == "+" || token == "-" || token == "*" || token == "/" = 
+                       | all (`elem` "+-*/") token = 
                          let (¤) = case token of
                                "+" -> (+)
                                "-" -> (-)
                                "*" -> (*)
                                "/" -> div
+                               _   -> error "invalid token: " ++ token
                                in eval (¤) stack where 
                                                        eval (¤) stack' = -- TODO: refactor this method into a more general one: one which takes an arbitary binary operator, a stack, and uses the two operands at the top of the stack to evaluate it (or throws stack underflow if there aren't at least two elements on the stack.)
                                                          let x = head stack'
