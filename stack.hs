@@ -1,3 +1,5 @@
+-- TODO: make a goto word? goto any point in the stack, and continue execution from there (elements above are just pushed upwards as you execute code)
+
 import Data.Char (isDigit)
 import Data.List (words, any, all)
 
