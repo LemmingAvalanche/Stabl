@@ -16,14 +16,10 @@ swap [] = error underflow
 swap [_] = error underflow
 swap (x:y:xs) = y:x:xs
 
--- The AST for the language. This should really only be the list of legal tokens of the language. 
-data Stabl = Word [Stabl]   -- Word
-               | Lit Int    -- Literal
-                 deriving (Show,Eq) -- TODO: meir?
-
 tokenize :: String -> [String]
 tokenize = words
 
+-- TODO: update type to be 
 interpret :: ([String],[Int]) -> Int
 interpret ([],stack) = head stack
 interpret ((token:xs),stack)
