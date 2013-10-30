@@ -14,9 +14,6 @@ int =  do
   _ <- notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
   return i
 
-tryInt :: Parser Stabl
-tryInt = try $ lookAhead int
-
 -- | Try parsing an int. If the parse fails, no input is consumed and no error is propagated. 
 
 word :: Parser Stabl
@@ -24,7 +21,7 @@ word = liftM Word $ many1 alphaNum -- TODO: change to any character that is not 
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error.  
 stablToken :: Parser Stabl
-stablToken =  tryInt <|> word 
+stablToken =  (try int) <|> word 
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
 parseStabl = do 
