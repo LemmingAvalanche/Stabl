@@ -5,15 +5,12 @@ data Stabl = Word String    -- Word
                | Lit Int    -- Literal
                  deriving (Show,Read,Eq) -- TODO: meir?
 
--- Tester Parsec.......
-
+-- | The usual integer
 int :: Parser Stabl
 int =  do 
   i <- liftM (Lit . read) $ many1 digit 
   _ <- notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
   return i
-
--- | Try parsing an int. If the parse fails, no input is consumed and no error is propagated. 
 
 word :: Parser Stabl
 word = liftM Word $ many1 alphaNum -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
@@ -23,7 +20,10 @@ stablToken :: Parser Stabl
 stablToken =  (try int) <|> word 
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
-parseStabl = do 
+parseStabl = do
+  _ <- discardWhitespace
   program <- parse $ stablToken `sepBy` spaces 
-  _ <- parse $ skipMany space :: SourceName -> String -> Either ParseError () -- Discard all whitespace at end of program
-  return program
+  _ <- discardWhitespace  -- Discard all whitespace at end of program
+  return program 
+    where discardWhitespace = parse $ skipMany space :: SourceName -> String -> Either ParseError ()
+
