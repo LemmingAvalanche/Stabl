@@ -25,5 +25,6 @@ parseStabl = do
   program <- parse $ stablToken `sepBy` spaces 
   _ <- discardWhitespace  -- Discard all whitespace at end of program
   return program 
+    -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an exception). 
     where discardWhitespace = parse $ skipMany space :: SourceName -> String -> Either ParseError ()
 
