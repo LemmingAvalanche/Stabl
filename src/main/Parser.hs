@@ -12,12 +12,14 @@ int =  do
   _ <- notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
   return i
 
-word :: Parser Stabl
-word = liftM Word $ many1 alphaNum -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
+-- | called "word prime" in order to be sure that it doesn't conflict
+-- | with any function named "word" in Parsec.
+word' :: Parser Stabl
+word' = liftM Word $ many1 alphaNum -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error.  
 stablToken :: Parser Stabl
-stablToken =  (try int) <|> word 
+stablToken =  (try int) <|> word'
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
 parseStabl = do
@@ -26,5 +28,5 @@ parseStabl = do
   _ <- discardWhitespace  -- Discard all whitespace at end of program
   return program 
     -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an exception). 
-    where discardWhitespace = parse $ skipMany space :: SourceName -> String -> Either ParseError ()
+    where discardWhitespace = parse $ many space :: SourceName -> String -> Either ParseError String
 
