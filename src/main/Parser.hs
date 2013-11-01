@@ -1,5 +1,12 @@
+module Parser 
+       (
+         Stabl 
+       , parseStabl
+       ) where
+
+
 import Text.ParserCombinators.Parsec -- AST for the language. This should really only be the list of legal tokens of the language. 
-import Control.Monad hiding ((<|>))
+import Control.Monad (liftM)
 
 data Stabl = Word String    -- Word
                | Lit Int    -- Literal

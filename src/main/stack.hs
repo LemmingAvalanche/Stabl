@@ -1,6 +1,8 @@
 import Data.Char (isDigit)
 import Data.List (words, any, all)
 
+import Parser
+
 underflow = "stack underflow!"
 
 pop [] = error underflow
