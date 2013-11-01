@@ -1,6 +1,6 @@
 module Parser 
        (
-         Stabl 
+         Stabl(..)
        , parseStabl
        ) where
 

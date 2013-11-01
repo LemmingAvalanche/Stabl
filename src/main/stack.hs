@@ -22,26 +22,37 @@ tokenize :: String -> [String]
 tokenize = words
 
 -- TODO: update type to be 
-interpret :: ([String],[Int]) -> Int
-interpret ([],stack) = head stack
-interpret ((token:xs),stack)
-  | all isDigit token = let num = read token in interpret (xs,(num:stack))
-  | all (`elem` "+-*/") token = 
-    let (¤) = case token of
-            "+" -> (+)
-            "-" -> (-)
-            "*" -> (*)
-            "/" -> div
-            _   -> error $ "invalid token: " ++ token
-                   in interpret (xs, eval stack (¤))
+
+-- | interpret a program given by a String
+interpret :: String -> Int
+interpret s = interpret' (program,[]) 
+  where program = case parseStabl "" s
+                  of Right pro -> pro
+                     -- Left ParseError -> error "parse error!" 
+
+
+interpret' :: ([Stabl],[Stabl]) -> Int
+interpret' ([],stack) = case (head stack) of Lit num -> num; Word w -> error "type error!"
+interpret' (Lit n : xs, stack) = interpret' (xs, Lit n : stack)
+interpret' (Word s : xs, stack) = 
+    let (¤) = case s of
+            "add"   -> (+)
+            "minus" -> (-)
+            "mul"   -> (*)
+            "div"   -> div 
+            other   -> error $ "invalid word: " ++ other 
+                            in interpret' (xs, eval stack (¤))
                                                        
  -- TODO: refactor this method into a more general one: one which takes an arbitary binary operator, a stack, and uses the two operands at the top of the stack to evaluate it (or throws stack underflow if there aren't at least two elements on the stack.)
 
-eval :: [Int] -> (Int -> Int -> Int) -> [Int]
+eval :: [Stabl] -> (Int -> Int -> Int) -> [Stabl]
 eval stack (¤) = let x = head stack
                      y = head $ pop stack
-                     res = x ¤ y
-                 in res:(pop $ pop stack)
+                     res = (get x) ¤ (get y) where get t = 
+                                                     case t of 
+                                                       Word s -> error $ "was String, expected num: " ++ s 
+                                                       Lit n -> n
+                 in (Lit res):(pop $ pop stack)
          
 
 
