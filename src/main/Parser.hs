@@ -8,6 +8,9 @@ module Parser
 import Text.ParserCombinators.Parsec -- AST for the language. This should really only be the list of legal tokens of the language. 
 import Control.Monad (liftM)
 
+-- keywords
+def = "def"
+
 data Stabl = Word String    -- Word
                | Lit Int    -- Literal
                  deriving (Show,Read,Eq) -- TODO: meir?
