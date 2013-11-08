@@ -43,10 +43,9 @@ quotation = between (string openQuot) (string closeQuot) sequenceStablToken
 
 -- | The usual integer
 int :: Parser Stabl
-int =  do 
-  i <- fmap (Lit . read) $ many1 digit 
-  _ <- notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
-  return i
+int =     fmap (Lit . read) $ many1 digit
+       <* notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
+
 
 -- | called "word prime" in order to be sure that it doesn't conflict
 -- | with any function named "word" in Parsec.
@@ -54,7 +53,7 @@ word' :: Parser Word
 word' = many1 alphaNum
 
 wordCall :: Parser Stabl
-wordCall = liftM WordCall word' -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
+wordCall = fmap WordCall word' -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error.  
 stablToken :: Parser Stabl
