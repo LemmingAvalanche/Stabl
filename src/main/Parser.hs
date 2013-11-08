@@ -6,8 +6,7 @@ module Parser
 
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))-- AST for the language. This should really only be the list of legal tokens of the language. 
-import Control.Applicative 
-import Control.Monad (liftM)
+import Control.Applicative
 
 -- defines a word (function). Syntax:
 -- def <name> (quotation or stablToken)
@@ -27,21 +26,12 @@ data Stabl = WordCall String    -- Word
                | Lit Int    -- Literal
                  deriving (Show,Read,Eq) -- TODO: meir?
 
--- | A word definition
-wordDef :: Parser WordDef
-wordDef = do
-  string def :: Parser String
-  name <- word'
-  quot' <- quotation
-  return $ Def name quot'
-  
--- Trying to implement wordDef, but with applicative functors
-{-
-wordDef' :: Parser WordDef
-wordDef' =     string def
-           *>  word'
-           <*> quotation
--}
+-- | A word definition  
+wordDef :: Parser WordDef -- TODO uncomment and fix
+wordDef =  string def
+           *>  pure Def
+           <*> word'
+           <*> quotation 
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
