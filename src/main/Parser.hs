@@ -29,14 +29,19 @@ data Stabl = WordCall String    -- Word
 
 -- | A word definition
 wordDef :: Parser WordDef
-wordDef = do 
-  _ <- string def :: Parser String
+wordDef = do
+  string def :: Parser String
   name <- word'
   quot' <- quotation
   return $ Def name quot'
   
 -- Trying to implement wordDef, but with applicative functors
-wordDef' = undefined -- TODO
+{-
+wordDef' :: Parser WordDef
+wordDef' =     string def
+           *>  word'
+           <*> quotation
+-}
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
@@ -62,11 +67,9 @@ stablToken =  (try int) <|> wordCall
 sequenceStablToken = stablToken `sepBy` spaces 
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
-parseStabl = do
-  _ <- discardWhitespace
-  program <- parse sequenceStablToken
-  _ <- discardWhitespace  -- Discard all whitespace at end of program
-  return program 
-    -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an exception). 
-    where discardWhitespace = parse $ many space :: SourceName -> String -> Either ParseError String
+parseStabl =    discardWhitespace
+             *> parse sequenceStablToken
+             <* discardWhitespace
+                 where discardWhitespace = parse $ many space :: SourceName -> String -> Either ParseError String
+    -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an 
 
