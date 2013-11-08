@@ -5,8 +5,8 @@ module Parser
        ) where
 
 
-import Text.ParserCombinators.Parsec -- AST for the language. This should really only be the list of legal tokens of the language. 
-import Control.Applicative hiding (many, (<|>))
+import Text.ParserCombinators.Parsec hiding (many, (<|>))-- AST for the language. This should really only be the list of legal tokens of the language. 
+import Control.Applicative 
 import Control.Monad (liftM)
 
 -- defines a word (function). Syntax:
@@ -44,7 +44,7 @@ quotation = between (string openQuot) (string closeQuot) sequenceStablToken
 -- | The usual integer
 int :: Parser Stabl
 int =  do 
-  i <- liftM (Lit . read) $ many1 digit 
+  i <- fmap (Lit . read) $ many1 digit 
   _ <- notFollowedBy letter -- TODO: change? a string like "225+-" shouldn't be parsed by consuming "225" and discarding "+-". 
   return i
 
