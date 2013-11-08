@@ -6,6 +6,7 @@ module Parser
 
 
 import Text.ParserCombinators.Parsec -- AST for the language. This should really only be the list of legal tokens of the language. 
+import Control.Applicative hiding (many, (<|>))
 import Control.Monad (liftM)
 
 -- defines a word (function). Syntax:
@@ -33,6 +34,9 @@ wordDef = do
   name <- word'
   quot' <- quotation
   return $ Def name quot'
+  
+-- Trying to implement wordDef, but with applicative functors
+wordDef' = undefined -- TODO
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
@@ -50,7 +54,7 @@ word' :: Parser Word
 word' = many1 alphaNum
 
 wordCall :: Parser Stabl
-wordCall = liftM WordCall $ word' -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
+wordCall = liftM WordCall word' -- TODO: change to any character that is not whitespace? It should be possible to use strings like "+" and "-" as identifiers of words. 
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error.  
 stablToken :: Parser Stabl
