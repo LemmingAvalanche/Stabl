@@ -1,9 +1,9 @@
 module Parser 
        (
-         Stabl(..)
+         WordDef(..)
+       , Stabl(..)
        , parseStabl
        ) where
-
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))-- AST for the language. This should really only be the list of legal tokens of the language. 
 import Control.Applicative
@@ -15,8 +15,10 @@ openQuot = "["
 closeQuot = "]";
 
 -- TODO: legg til alternativ: def <name> StablToken. Isåfall må eg oppdatere parseren.
-data WordDef = Def Word Quot
-               deriving (Show,Read,Eq,Ord)
+-- TODO: add type declaration?
+data WordDef = Def {  name :: Word 
+                    , quot :: Quot
+                    } deriving (Show,Read,Eq,Ord)
 
 -- TODO: give better name
 data Choice = Stabl | Quot deriving (Show,Read,Eq,Ord)
@@ -35,6 +37,12 @@ wordDef =  (string def *> whitespace1)
            *> liftA2 Def 
            (word' <* whitespace1) 
            quotation -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
+           
+-- | Parser for declarations in a file. There has to be at least one declaration
+declarations :: Parser [WordDef]
+declarations = many1 wordDef
+
+parseDecl = parse $ wordDef `sepBy` whitespace1
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
@@ -69,5 +77,4 @@ whitespace1 = many1 space
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
 parseStabl = parse sequenceStablToken
-    -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an 
 
