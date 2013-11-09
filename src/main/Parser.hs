@@ -15,23 +15,27 @@ openQuot = "["
 closeQuot = "]";
 
 -- TODO: legg til alternativ: def <name> StablToken. Isåfall må eg oppdatere parseren.
-data WordDef = Def Word Quot 
-               deriving (Show,Read,Eq)
+data WordDef = Def Word Quot
+               deriving (Show,Read,Eq,Ord)
+
+-- TODO: give better name
+data Choice = Stabl | Quot deriving (Show,Read,Eq,Ord)
 
 type Word = String
 -- quotation. see: cat-lang
 type Quot = [Stabl]
 
-data Stabl = WordCall String    -- Word
+data Stabl = WordCall Word    -- Word
                | Lit Int    -- Literal
-                 deriving (Show,Read,Eq) -- TODO: meir?
+                 deriving (Show,Read,Eq,Ord) -- TODO: meir?
 
 -- | A word definition  
-wordDef :: Parser WordDef -- TODO uncomment and fix
-wordDef =  string def
-           *>  pure Def
-           <*> word'
-           <*> quotation 
+wordDef :: Parser WordDef 
+wordDef =  (string def *> space) 
+           *> liftA2 Def 
+           (word' <* space) 
+           quotation -- equivalent to *> pure Def <*> word' quotation
+           -- <|> stablToken -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
