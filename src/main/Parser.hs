@@ -31,11 +31,10 @@ data Stabl = WordCall Word    -- Word
 
 -- | A word definition  
 wordDef :: Parser WordDef 
-wordDef =  (string def *> space) 
+wordDef =  (string def *> whitespace1)
            *> liftA2 Def 
-           (word' <* space) 
-           quotation -- equivalent to *> pure Def <*> word' quotation
-           -- <|> stablToken -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
+           (word' <* whitespace1) 
+           quotation -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
@@ -58,12 +57,17 @@ wordCall = fmap WordCall word' -- TODO: change to any character that is not whit
 stablToken :: Parser Stabl
 stablToken =  (try int) <|> wordCall
 
-sequenceStablToken = stablToken `sepBy` spaces 
+-- TODO: give better name
+sequenceStablToken =    whitespace         
+                     *> stablToken `sepBy` whitespace1
+                     <* whitespace -- BUG: gives exception if there is whitespace at end of string 
+
+whitespace = many space
+
+whitespace1 :: Parser String
+whitespace1 = many1 space
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
-parseStabl =    discardWhitespace
-             *> parse sequenceStablToken
-             <* discardWhitespace
-                 where discardWhitespace = parse $ many space :: SourceName -> String -> Either ParseError String
+parseStabl = parse sequenceStablToken
     -- TODO: found a bug: this doesn't seem to help with whitespace at start of input (returns empty list of tokens) nor at end of input (throws an 
 
