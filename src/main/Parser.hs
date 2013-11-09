@@ -2,22 +2,23 @@ module Parser
        (
          WordDef(..)
        , Stabl(..)
+       , parseDecl
        , parseStabl
        ) where
 
-import Text.ParserCombinators.Parsec hiding (many, (<|>))-- AST for the language. This should really only be the list of legal tokens of the language. 
+import Text.ParserCombinators.Parsec hiding (many, (<|>))
 import Control.Applicative
 
 -- defines a word (function). Syntax:
--- def <name> (quotation or stablToken)
+-- def <name> (quotation or stablToken) 
 def = "def"
 openQuot = "["
 closeQuot = "]";
 
 -- TODO: legg til alternativ: def <name> StablToken. Isåfall må eg oppdatere parseren.
 -- TODO: add type declaration?
-data WordDef = Def {  name :: Word 
-                    , quot :: Quot
+data WordDef = Def {  wordName :: Word 
+                    , wordQuot :: Quot
                     } deriving (Show,Read,Eq,Ord)
 
 -- TODO: give better name
@@ -33,7 +34,7 @@ data Stabl = WordCall Word    -- Word
 
 -- | A word definition  
 wordDef :: Parser WordDef 
-wordDef =  (string def *> whitespace1)
+wordDef =  (string  def *> whitespace1)
            *> liftA2 Def 
            (word' <* whitespace1) 
            quotation -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
@@ -42,7 +43,7 @@ wordDef =  (string def *> whitespace1)
 declarations :: Parser [WordDef]
 declarations = many1 wordDef
 
-parseDecl = parse $ wordDef `sepBy` whitespace1
+parseDecl = parse $ wordDef `sepBy` whitespace -- NOTE: it seems that this parser will also accept word definitions that are come right after each other, ie without any whitespace. I use whitespace rather than whitespace1 because the latter would simply not parse word definitions that came up without a whitespace delimiting it, and that behaviour was more sneaky than this one.
 
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
