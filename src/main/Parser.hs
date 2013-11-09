@@ -1,7 +1,9 @@
 module Parser 
        (
          WordDef(..)
+       , Word
        , Stabl(..)
+       , Quot
        , parseDecl
        , parseStabl
        ) where
