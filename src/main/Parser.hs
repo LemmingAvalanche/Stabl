@@ -30,7 +30,8 @@ type Word = String
 -- quotation. see: cat-lang
 type Quot = [Stabl]
 
-data Stabl = WordCall Word    -- Word
+data Stabl = WordCall Word
+           | Quotation Quot
                | Lit Int    -- Literal
                  deriving (Show,Read,Eq,Ord) -- TODO: meir?
 

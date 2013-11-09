@@ -30,24 +30,28 @@ tokenize = words
 -- TODO: update type to be 
 
 -- | interpret a program given by a String
-interpret :: String -> Int
+interpret :: String -> [Stabl]
 interpret s = interpret' (program,[]) 
   where program = case parseStabl "" s
                   of Right pro -> pro
                      -- Left ParseError -> error "parse error!" 
 
 
-interpret' :: ([Stabl],[Stabl]) -> Int
-interpret' ([],stack) = case (head stack) of Lit num -> num; WordCall w -> error "type error!"
+interpret' :: ([Stabl],[Stabl]) -> [Stabl]
+interpret' ([],stack) = case (head stack) of 
+  Lit num    -> stack -- Correct? 
+  Quotation quot' -> stack -- Correct?
+  WordCall w -> error "type error!"
 interpret' (Lit n : xs, stack) = interpret' (xs, Lit n : stack)
 interpret' (WordCall s : xs, stack) = 
-    let (¤) = case s of -- TODO: really hardcoded
-            "add"   -> (+)
-            "minus" -> (-)
-            "mul"   -> (*)
-            "div"   -> div 
+    case s of -- TODO: really hardcoded
+            "add"   -> interpret' (xs, eval stack (+))
+            "minus" -> interpret' (xs, eval stack (-))
+            "mul"   -> interpret' (xs, eval stack (*))
+            "div"   -> interpret' (xs, eval stack div)
+            -- built-in stack combinators
+            -- 
             other   -> error $ "invalid word: " ++ other 
-                            in interpret' (xs, eval stack (¤))
                                                        
  -- TODO: refactor this method into a more general one: one which takes an arbitary binary operator, a stack, and uses the two operands at the top of the stack to evaluate it (or throws stack underflow if there aren't at least two elements on the stack.)
 
