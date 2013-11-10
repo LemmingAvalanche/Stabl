@@ -16,7 +16,5 @@ allUnique = null . allDuplicates
 allDuplicates :: [WordDef] -> [WordDef]
 allDuplicates =     sortBy (compare `on` fst)
                     >>> groupBy ((==) `on` fst)
-                    >>> filter ((>1) . length)
-                    >>> concat
-                    --head . filter ((>1) . length)
-                -- . group . sortBy (compare `on` fst)
+                    >>> filter lengthGreaterThan1
+                    >>> concat where lengthGreaterThan1 = length >>> (>1)
