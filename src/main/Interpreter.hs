@@ -49,7 +49,7 @@ interpret' (WordCall s : xs, stack) =
             "minus" -> interpret' (xs, eval stack (-))
             "mul"   -> interpret' (xs, eval stack (*))
             "div"   -> interpret' (xs, eval stack div)
-            -- built-in stack combinators
+            -- built-in stack combinators TODO: implement
             -- 
             other   -> error $ "invalid word: " ++ other 
                                                        

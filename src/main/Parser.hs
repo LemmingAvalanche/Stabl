@@ -1,6 +1,6 @@
 module Parser 
        (
-         WordDef(..)
+         WordDef
        , Word
        , Stabl(..)
        , Quot
@@ -19,9 +19,11 @@ closeQuot = "]";
 
 -- TODO: legg til alternativ: def <name> StablToken. Isåfall må eg oppdatere parseren.
 -- TODO: add type declaration?
-data WordDef = Def {  wordName :: Word 
-                    , wordQuot :: Quot
-                    } deriving (Show,Read,Eq,Ord)
+-- data WordDef = Def {  wordName :: Word 
+--                    , wordQuot :: Quot
+--                    } deriving (Show,Read,Eq,Ord)
+
+type WordDef = (Word, Quot)
 
 -- TODO: give better name
 data Choice = Stabl | Quot deriving (Show,Read,Eq,Ord)
@@ -36,9 +38,9 @@ data Stabl = WordCall Word
                  deriving (Show,Read,Eq,Ord) -- TODO: meir?
 
 -- | A word definition  
-wordDef :: Parser WordDef 
+wordDef :: Parser WordDef
 wordDef =  (string  def *> whitespace1)
-           *> liftA2 Def 
+           *> liftA2 (,)
            (word' <* whitespace1) 
            quotation -- NOTE: eg skulle gjerne ha lagt til <|> stabl, altså at ein Def kan bestå av eit namn og ein quotation ELLER eit namn og ein stablToken
            
