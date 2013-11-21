@@ -24,18 +24,27 @@ rot [_] = error underflow
 rot [_,_] = error underflow
 rot (x:y:z:xs) = z:x:y:xs
 
+-- TODO: possible to implement using rot (or something) and the return stack?
+over [] = error underflow
+over [_] = error underflow
+over [_,_] = error underflow
+over (x:y:xs) = y:x:y:xs
+
 tokenize :: String -> [String]
 tokenize = words
 
 -- TODO: update type to be 
 
--- | interpret a program given by a String
-interpret :: String -> [Stabl]
-interpret s = interpret' (program,[]) 
+-- TODO: implement checking
+parseCheckAndInterpret :: String -> [Stabl]
+parseCheckAndInterpret s = interpret program 
   where program = case parseStabl "" s
                   of Right pro -> pro
                      -- Left ParseError -> error "parse error!" 
 
+-- | interpret a program given by a quotation.
+interpret :: [Stabl] -> [Stabl]
+interpret s = interpret' (s,[]) 
 
 interpret' :: ([Stabl],[Stabl]) -> [Stabl]
 interpret' ([],stack) = case (head stack) of 
@@ -50,7 +59,11 @@ interpret' (WordCall s : xs, stack) =
             "mul"   -> interpret' (xs, eval stack (*))
             "div"   -> interpret' (xs, eval stack div)
             -- built-in stack combinators TODO: implement
-            -- 
+            "pop"   -> interpret' (xs, pop stack)
+            "dup"   -> interpret' (xs, dup stack)
+            "swap"  -> interpret' (xs, swap stack)
+            "rot"   -> interpret' (xs, rot stack)
+            "over"  -> interpret' (xs, over stack)
             other   -> error $ "invalid word: " ++ other 
                                                        
  -- TODO: refactor this method into a more general one: one which takes an arbitary binary operator, a stack, and uses the two operands at the top of the stack to evaluate it (or throws stack underflow if there aren't at least two elements on the stack.)
