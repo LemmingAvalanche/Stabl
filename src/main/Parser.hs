@@ -14,8 +14,11 @@ import Control.Applicative
 -- defines a word (function). Syntax:
 -- def <name> (quotation or stablToken) 
 def = "def"
+openDef = "{"
+closeDef = "}"
+
 openQuot = "["
-closeQuot = "]";
+closeQuot = "]"
 
 -- TODO: legg til alternativ: def <name> StablToken. Isåfall må eg oppdatere parseren.
 -- TODO: add type declaration?
@@ -53,6 +56,10 @@ parseDecl = parse $ wordDef `sepBy` whitespace -- NOTE: it seems that this parse
 quotation :: Parser Quot
 quotation = between (string openQuot) (string closeQuot) sequenceStablToken
 
+-- | The same syntax as a quotation, only the def is enclosed by curly braces instead of square braces.
+definitionBody :: Parser Quot
+definitionBody = between (string openDef) (string closeDef) sequenceStablToken
+
 -- | The usual integer
 int :: Parser Stabl
 int =     fmap (Lit . read) $ many1 digit
@@ -71,7 +78,6 @@ wordCall = fmap WordCall word' -- TODO: change to any character that is not whit
 stablToken :: Parser Stabl
 stablToken =  (try int) <|> wordCall
 
--- TODO: give better name
 sequenceStablToken =    whitespace         
                      *> stablToken `sepBy` whitespace1
                      <* whitespace -- BUG: gives exception if there is whitespace at end of string 
