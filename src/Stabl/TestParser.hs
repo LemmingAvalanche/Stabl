@@ -1,8 +1,3 @@
-module TestParser
-       (
-         testDef1GivesNoError
-       , testDef1ParsesCorrectly
-       ) where
 import Test.HUnit
 import Data.Either
 

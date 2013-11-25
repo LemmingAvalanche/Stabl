@@ -1,3 +1,9 @@
+module Interpreter
+       (
+         parseCheckAndInterpret
+       , interpret
+       ) where
+
 import Data.Char (isDigit)
 import Data.List (words, any, all)
 import qualified Data.Map as Map
@@ -49,7 +55,6 @@ newtype Stack a = Stack { getStack :: [a] }
 newtype Return a = Return { getReturn :: [a] }
 -- Result stack
 newtype Result a = Result { getResult :: [a] }
-
 
 -- TODO: fix all function-calls to also use a dictionary.
 interpret' :: (Stack Stabl, [Stabl]) -> Result Stabl
