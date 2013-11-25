@@ -28,19 +28,16 @@ rot (x:y:z:xs) = z:x:y:xs
 
 over [] = error underflow
 over [_] = error underflow
-over [_,_] = error underflow
 over (x:y:xs) = y:x:y:xs
 
-
 -- TODO: implement checking
-{-
-parseCheckAndInterpret :: String -> Map.Map Word Quot -> Result Stabl
-parseCheckAndInterpret s = interpret program -- TODO: implement with a dict
+parseCheckAndInterpret :: String -> [Stabl]
+parseCheckAndInterpret s = getResult $ interpret program -- TODO: implement with a dict
   where program = case parseStabl "" s
                   of Right pro -> pro
+                     Left _ -> error "oooopps!"
                      -- Left ParseError -> error "parse error!"
-}
--}
+
 -- | interpret a program given by a quotation.
 interpret :: [Stabl] -> Result Stabl
 interpret s = interpret' (Stack s, [])
@@ -75,7 +72,7 @@ interpret' (Stack (WordCall s : xs), stack) =
             "rot"   -> interpret' (Stack xs, rot stack)
             "over"  -> interpret' (Stack xs, over stack)
             -- user-defined word TODO: implement
-            other   -> error $ "valid word: " ++ other 
+            other   -> error $ "invalid word: " ++ other 
 
 eval :: [Stabl] -> (Int -> Int -> Int) -> [Stabl]
 eval stack (¤) = let x = head stack
