@@ -36,17 +36,33 @@ over [] = error underflow
 over [_] = error underflow
 over (x:y:xs) = y:x:y:xs
 
+-- implementation of word-call
+
+-- TODO: funker ikkje: det ser ut som om den blir evaluert i motsatt rekkefølge av det eg ønsker.
+                -- eks:
+                -- interpret ((Lit 1): [WordCall "dup"]) 
+                -- evaluerer til:
+                -- [Lit 1, Lit 1]
+                -- Men eg vil at dette skal evaluere til det:
+                -- interpret ((WordCall "dup"): [Lit 1] ) 
+                -- altså at, viss eg møter ein quot som inneholder ein WordCall, så må eg evaluere den på toppen av stacken. 
+                -- I dette tilfellet så burde dup bli pusha på stacken, og evalueres med å konsumere toppen av stacken, og legge igjen to nye verdiar (nemlig verdien som den konsumerte, pluss eit duplikat av den).
+apply :: [Stabl] -> (Map.Map String [Stabl], [Stabl]) -> [Stabl]
+apply quot (dict, stack) = apply' quot stack
+  where apply' [] stack' = stack'
+        apply' (x:xs) stack' = apply' xs (getResult (interpret (x:stack') dict))
+                                                                                    
 -- TODO: implement checking
 parseCheckAndInterpret :: String -> [Stabl]
-parseCheckAndInterpret s = getResult $ interpret program -- TODO: implement with a dict
+parseCheckAndInterpret s = getResult $ interpret program undefined -- TODO: dict is undefined!!
   where program = case parseStabl "" s
                   of Right pro -> pro
                      Left _ -> error "oooopps!"
                      -- Left ParseError -> error "parse error!"
 
 -- | interpret a program given by a quotation.
-interpret :: [Stabl] -> Result Stabl
-interpret s = interpret' (Stack s, [])
+interpret :: [Stabl] -> Map.Map String [Stabl] -> Result Stabl
+interpret s dict = interpret' (Stack s, dict , [])
 
 -- TODO: implement these in the interpreter functions
 -- Data stack
@@ -57,27 +73,30 @@ newtype Return a = Return { getReturn :: [a] }
 newtype Result a = Result { getResult :: [a] }
 
 -- TODO: fix all function-calls to also use a dictionary.
-interpret' :: (Stack Stabl, [Stabl]) -> Result Stabl
-interpret' (Stack [], stack) = case (head stack) of 
+interpret' :: (Stack Stabl, Map.Map String [Stabl], [Stabl]) -> Result Stabl
+interpret' (Stack [], dict, stack) = case (head stack) of 
   Lit num    -> Result stack
   Quotation quot' -> Result stack
   WordCall w -> error "type error!"
-interpret' (Stack (Lit n : xs), stack) = interpret' (Stack xs, Lit n : stack)
-interpret' (Stack (WordCall s : xs), stack) = 
-    -- Built-in words
+interpret' (Stack (Lit n : xs), dict, stack) = interpret' (Stack xs, dict, Lit n : stack)
+interpret' (Stack (WordCall s : xs), dict, stack) = 
+    -- Built-in words  
     case s of -- TODO: hardcoded
-            "add"   -> interpret' (Stack xs, eval stack (+))
-            "minus" -> interpret' (Stack xs, eval stack (-))
-            "mul"   -> interpret' (Stack xs, eval stack (*))
-            "div"   -> interpret' (Stack xs, eval stack div)
+            "add"   -> interpret' (Stack xs, dict, eval stack (+))
+            "minus" -> interpret' (Stack xs, dict, eval stack (-))
+            "mul"   -> interpret' (Stack xs, dict, eval stack (*))
+            "div"   -> interpret' (Stack xs, dict, eval stack div)
             -- built-in stack combinators 
-            "pop"   -> interpret' (Stack xs, pop stack)
-            "dup"   -> interpret' (Stack xs, dup stack)
-            "swap"  -> interpret' (Stack xs, swap stack)
-            "rot"   -> interpret' (Stack xs, rot stack)
-            "over"  -> interpret' (Stack xs, over stack)
-            -- user-defined word TODO: implement
-            other   -> error $ "invalid word: " ++ other 
+            "pop"   -> interpret' (Stack xs, dict, pop stack)
+            "dup"   -> interpret' (Stack xs, dict, dup stack)
+            "swap"  -> interpret' (Stack xs, dict, swap stack)
+            "rot"   -> interpret' (Stack xs, dict, rot stack)
+            "over"  -> interpret' (Stack xs, dict, over stack)
+            -- user-defined word 
+            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, wordBody `apply` (dict, stack)) -- TODO: implement apply
+                                       Nothing      -> error $ "undefined word: " ++ other ++ ". Program exiting." 
+              where lookup' = Map.lookup other dict
+
 
 eval :: [Stabl] -> (Int -> Int -> Int) -> [Stabl]
 eval stack (¤) = let x = head stack
