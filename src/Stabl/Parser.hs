@@ -28,6 +28,8 @@ data Choice = Stabl | Quot deriving (Show,Read,Eq,Ord)
 
 type Word = String
 -- quotation. see: cat-lang
+-- NOTE: can use Quot as a collection/list: don't need a separate collection/list syntax and semantics
+--- (though should probably have some primitive functions, like cons and append).
 type Quot = [Stabl] 
 
 data Stabl = WordCall Word
