@@ -71,7 +71,7 @@ wordCall = fmap WordCall word'
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error.  
 stablToken :: Parser Stabl
-stablToken =  (try int) <|> wordCall
+stablToken =  (try int) <|> wordCall <|> (fmap Quotation quotation)
 
 sequenceStablToken =    whitespace         
                      *> stablToken `sepBy` whitespace1

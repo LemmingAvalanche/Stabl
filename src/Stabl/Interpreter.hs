@@ -50,14 +50,17 @@ over (x:y:xs) = y:x:y:xs
 apply :: [Stabl] -> (Map.Map String [Stabl], [Stabl]) -> [Stabl]
 apply quot (dict, stack) = apply' quot stack
   where apply' [] stack' = stack'
-        apply' (x:xs) stack' = apply' xs (getResult (interpret (x:stack') dict))
-                                                                                    
+        apply' (x:xs) stack' = apply' xs $ getResult $ interpret (x:stack') dict
+
+newApply :: [Stabl] -> Map.Map String [Stabl] ->  [Stabl] -> [Stabl]
+newApply stack dict quot = getResult $ interpret (quot ++ stack) dict --- ...eller reverse quot?
+
 -- TODO: implement checking
 parseCheckAndInterpret :: String -> [Stabl]
 parseCheckAndInterpret s = getResult $ interpret program undefined -- TODO: dict is undefined!!
   where program = case parseStabl "" s
                   of Right pro -> pro
-                     Left _ -> error "oooopps!"
+                     Left parseError -> error (show parseError)
                      -- Left ParseError -> error "parse error!"
 
 -- | interpret a program given by a quotation.
@@ -79,6 +82,7 @@ interpret' (Stack [], dict, stack) = case (head stack) of
   Quotation quot' -> Result stack
   WordCall w -> error "type error!"
 interpret' (Stack (Lit n : xs), dict, stack) = interpret' (Stack xs, dict, Lit n : stack)
+interpret' (Stack (Quotation quot : xs), dict, stack) = interpret' (Stack xs, dict, Quotation quot : stack)
 interpret' (Stack (WordCall s : xs), dict, stack) = 
     -- Built-in words  
     case s of -- TODO: hardcoded
@@ -92,8 +96,15 @@ interpret' (Stack (WordCall s : xs), dict, stack) =
             "swap"  -> interpret' (Stack xs, dict, swap stack)
             "rot"   -> interpret' (Stack xs, dict, rot stack)
             "over"  -> interpret' (Stack xs, dict, over stack)
+            
+            -- applying a quotation 
+            "apply"   -> case head' of Quotation quot -> interpret' (Stack xs, dict, newApply quot dict tail') -- funker ikkje 
+                                       other -> error $ "expected a quotation for word \"apply\", but was instead " ++ (show other)
+              where head' = head stack
+                    tail' = tail stack
+                                       
             -- user-defined word 
-            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, wordBody `apply` (dict, stack)) -- TODO: implement apply
+            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, newApply wordBody dict stack) -- TODO: implement apply
                                        Nothing      -> error $ "undefined word: " ++ other ++ ". Program exiting." 
               where lookup' = Map.lookup other dict
 
@@ -101,7 +112,7 @@ interpret' (Stack (WordCall s : xs), dict, stack) =
 eval :: [Stabl] -> (Int -> Int -> Int) -> [Stabl]
 eval stack (¤) = let x = head stack
                      y = head $ pop stack 
-                     res = (get x) ¤ (get y) 
+                     res = (get y) ¤ (get x) 
                        where get t = case t of 
                                WordCall s -> error $ "was String, expected num: " ++ s 
                                Lit n -> n
