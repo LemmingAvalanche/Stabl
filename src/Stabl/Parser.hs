@@ -9,6 +9,7 @@ module Parser
        ) where
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))
+import qualified Text.Parsec.Token as Token
 import Control.Applicative
 
 -- defines a word (function)
@@ -75,10 +76,12 @@ wordCall = fmap WordCall word'
 stablToken :: Parser Stabl
 stablToken =  (try int) <|> wordCall <|> (fmap Quotation quotation)
 
+sequenceStablToken :: Parser [Stabl]
 sequenceStablToken =    whitespace         
-                     *> stablToken `sepBy` whitespace1
+                     *> (stablToken `sepBy` whitespace1)
                      <* whitespace -- BUG: gives exception if there is whitespace at end of string 
 
+whitespace :: Parser String
 whitespace = many space
 
 whitespace1 :: Parser String

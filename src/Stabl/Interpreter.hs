@@ -47,6 +47,7 @@ over (x:y:xs) = y:x:y:xs
                 -- interpret ((WordCall "dup"): [Lit 1] ) 
                 -- altså at, viss eg møter ein quot som inneholder ein WordCall, så må eg evaluere den på toppen av stacken. 
                 -- I dette tilfellet så burde dup bli pusha på stacken, og evalueres med å konsumere toppen av stacken, og legge igjen to nye verdiar (nemlig verdien som den konsumerte, pluss eit duplikat av den).
+-- OBS: does not seem to work; use newApply instead (this function is incredibly ugly, anyway)
 apply :: [Stabl] -> (Map.Map String [Stabl], [Stabl]) -> [Stabl]
 apply quot (dict, stack) = apply' quot stack
   where apply' [] stack' = stack'
