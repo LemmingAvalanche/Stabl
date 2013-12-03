@@ -6,6 +6,9 @@
 -- Inspirert av Write Yourself a Lisp ...
 
 import System.IO
+--eg måtte visst importere denne for å få getArgs i main
+import System.Environment
+
 
 import Parser
 import Interpreter
@@ -29,8 +32,16 @@ until_ pred prompt action = do
      then return ()
      else action result >> until_ pred prompt action
           
+-- Loop infinitely until "quit" command
 runRepl :: IO ()
 runRepl = until_ (== "quit") (readPrompt "Stabl>>> ") evalAndPrint
+
+main :: IO ()
+main = do args <- getArgs
+          -- number of arguments
+          case length args of 0 -> runRepl
+                              1 -> evalAndPrint $ head args
+                              otherwise -> putStrLn "Program takes only 0 or 1 argument"
 
 
 
