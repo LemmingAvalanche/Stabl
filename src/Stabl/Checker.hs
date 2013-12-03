@@ -41,3 +41,5 @@ validWordCall (name,quot) set = if name `Set.member` set
                          then Nothing 
                          else Just $ 
                               "Error: word " ++ name ++ " is not a defined word. Was called in the definition: " ++ "\n\t" ++ (show quot)
+                              
+                              
