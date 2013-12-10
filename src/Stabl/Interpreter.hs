@@ -5,11 +5,9 @@ module Interpreter
        , getStack
        , getResult
        , getReturn
-       , newApply
+       , apply
        ) where
 
-import Data.Char (isDigit)
-import Data.List (words, any, all)
 import qualified Data.Map as Map
 
 import Parser
@@ -40,25 +38,8 @@ over [] = error underflow
 over [_] = error underflow
 over (x:y:xs) = y:x:y:xs
 
--- implementation of word-call
-
--- TODO: funker ikkje: det ser ut som om den blir evaluert i motsatt rekkefølge av det eg ønsker.
-                -- eks:
-                -- interpret ((Lit 1): [WordCall "dup"]) 
-                -- evaluerer til:
-                -- [Lit 1, Lit 1]
-                -- Men eg vil at dette skal evaluere til det:
-                -- interpret ((WordCall "dup"): [Lit 1] ) 
-                -- altså at, viss eg møter ein quot som inneholder ein WordCall, så må eg evaluere den på toppen av stacken. 
-                -- I dette tilfellet så burde dup bli pusha på stacken, og evalueres med å konsumere toppen av stacken, og legge igjen to nye verdiar (nemlig verdien som den konsumerte, pluss eit duplikat av den).
--- OBS: does not seem to work; use newApply instead (this function is incredibly ugly, anyway)
-apply :: [Stabl] -> (Map.Map String [Stabl], [Stabl]) -> [Stabl]
-apply quot (dict, stack) = apply' quot stack
-  where apply' [] stack' = stack'
-        apply' (x:xs) stack' = apply' xs $ getResult $ interpret (x:stack') dict
-
-newApply :: [Stabl] -> Map.Map String [Stabl] -> [Stabl] -> [Stabl]
-newApply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict --- ...eller reverse quot?
+apply :: [Stabl] -> Map.Map String [Stabl] -> [Stabl] -> [Stabl]
+apply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict --- ...eller reverse quot?
 
 -- TODO: implement checking
 parseCheckAndInterpret :: String -> Map.Map String [Stabl] -> [Stabl]
@@ -71,7 +52,6 @@ parseCheckAndInterpret s dict = getResult $ interpret program dict
 interpret :: [Stabl] -> Map.Map String [Stabl] -> Result Stabl
 interpret s dict = interpret' (Stack s, dict , [])
 
--- TODO: implement these in the interpreter functions
 -- Data stack
 newtype Stack a = Stack { getStack :: [a] }
 -- Return stack
@@ -79,7 +59,6 @@ newtype Return a = Return { getReturn :: [a] }
 -- Result stack
 newtype Result a = Result { getResult :: [a] }
 
--- TODO: fix all function-calls to also use a dictionary.
 interpret' :: (Stack Stabl, Map.Map String [Stabl], [Stabl]) -> Result Stabl
 interpret' (Stack [], dict, stack) = case (head stack) of 
   Lit num    -> Result stack
@@ -88,8 +67,8 @@ interpret' (Stack [], dict, stack) = case (head stack) of
 interpret' (Stack (Lit n : xs), dict, stack) = interpret' (Stack xs, dict, Lit n : stack)
 interpret' (Stack (Quotation quot : xs), dict, stack) = interpret' (Stack xs, dict, Quotation quot : stack)
 interpret' (Stack (WordCall s : xs), dict, stack) = 
-    -- Built-in words  
     case s of 
+            -- built-in words
             "add"   -> interpret' (Stack xs, dict, eval stack (+))
             "minus" -> interpret' (Stack xs, dict, eval stack (-))
             "mul"   -> interpret' (Stack xs, dict, eval stack (*))
@@ -102,16 +81,14 @@ interpret' (Stack (WordCall s : xs), dict, stack) =
             "over"  -> interpret' (Stack xs, dict, over stack)
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> interpret' (Stack xs, dict, newApply quot dict tail') 
+            "apply"   -> case head' of Quotation quot -> interpret' (Stack xs, dict, apply quot dict tail') 
                                        other -> error $ "expected a quotation for word \"apply\", but was instead " ++ (show other)
               where head' = head stack
                     tail' = tail stack
-                                       
             -- user-defined word 
-            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, newApply wordBody dict stack) 
+            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, apply wordBody dict stack) 
                                        Nothing      -> error $ "undefined word: " ++ other ++ ". Program exiting." 
               where lookup' = Map.lookup other dict
-
 
 eval :: [Stabl] -> (Int -> Int -> Int) -> [Stabl]
 eval stack (¤) = let x = head stack
