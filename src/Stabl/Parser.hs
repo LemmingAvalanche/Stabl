@@ -7,6 +7,8 @@ module Parser
        , parseDecl
        , parseStabl
        , parseStablUnsafely
+       , parseWordDef
+       , parseWordDefUnsafely
        ) where
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))
@@ -45,6 +47,10 @@ wordDef =  (string  def *> whitespace1) -- "def"
            *> liftA2 (,)                -- (,) is the tuple constructor: (,) a b = (a,b)
            (word' <* whitespace1)       -- name of the word
            definitionBody               -- { Stabl* }
+           
+parseWordDef = parse wordDef
+
+parseWordDefUnsafely str = case parseWordDef "" str of Right success -> success
            
 -- | Parser for declarations in a file. There has to be at least one declaration 
 declarations :: Parser [WordDef]

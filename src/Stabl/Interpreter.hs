@@ -61,12 +61,11 @@ newApply :: [Stabl] -> Map.Map String [Stabl] -> [Stabl] -> [Stabl]
 newApply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict --- ...eller reverse quot?
 
 -- TODO: implement checking
-parseCheckAndInterpret :: String -> [Stabl]
-parseCheckAndInterpret s = getResult $ interpret program Map.empty -- TODO: Map is empty
+parseCheckAndInterpret :: String -> Map.Map String [Stabl] -> [Stabl]
+parseCheckAndInterpret s dict = getResult $ interpret program dict
   where program = case parseStabl "" s
                   of Right pro -> pro
                      Left parseError -> error $ show parseError
-                     -- Left ParseError -> error "parse error!"
 
 -- | interpret a program given by a quotation.
 interpret :: [Stabl] -> Map.Map String [Stabl] -> Result Stabl
@@ -90,7 +89,7 @@ interpret' (Stack (Lit n : xs), dict, stack) = interpret' (Stack xs, dict, Lit n
 interpret' (Stack (Quotation quot : xs), dict, stack) = interpret' (Stack xs, dict, Quotation quot : stack)
 interpret' (Stack (WordCall s : xs), dict, stack) = 
     -- Built-in words  
-    case s of -- TODO: hardcoded
+    case s of 
             "add"   -> interpret' (Stack xs, dict, eval stack (+))
             "minus" -> interpret' (Stack xs, dict, eval stack (-))
             "mul"   -> interpret' (Stack xs, dict, eval stack (*))
@@ -103,13 +102,13 @@ interpret' (Stack (WordCall s : xs), dict, stack) =
             "over"  -> interpret' (Stack xs, dict, over stack)
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> interpret' (Stack xs, dict, newApply quot dict tail') -- funker ikkje 
+            "apply"   -> case head' of Quotation quot -> interpret' (Stack xs, dict, newApply quot dict tail') 
                                        other -> error $ "expected a quotation for word \"apply\", but was instead " ++ (show other)
               where head' = head stack
                     tail' = tail stack
                                        
             -- user-defined word 
-            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, newApply wordBody dict stack) -- TODO: implement apply
+            other   -> case lookup' of Just wordBody -> interpret' (Stack xs, dict, newApply wordBody dict stack) 
                                        Nothing      -> error $ "undefined word: " ++ other ++ ". Program exiting." 
               where lookup' = Map.lookup other dict
 

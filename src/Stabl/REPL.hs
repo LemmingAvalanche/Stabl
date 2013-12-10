@@ -28,32 +28,39 @@ readPrompt prompt =    flushStr prompt
                     >> getLine
 
 -- vits med?
-evalString :: String -> [Stabl]
-evalString = parseCheckAndInterpret
+-- evalString :: String -> [Stabl]
+-- evalString = parseCheckAndInterpret Map.empty
               
-evalPrintReturn :: String -> [Stabl] -> IO [Stabl]
-evalPrintReturn str stabl = do let expr = parseStablUnsafely str
-                               let result = newApply expr Map.empty stabl
-                               putStrLn $ show result 
-                               return result
+evalPrintReturn :: String -> ([Stabl], Map.Map String [Stabl]) -> IO ([Stabl] ,Map.Map String [Stabl])
+evalPrintReturn str@('d':'e':'f':rest) (stabl,dict) = let (name, body) = parseWordDefUnsafely str
+                                                          in do putStrLn "new word defined."
+                                                                return (stabl, Map.insert name body dict)
+                                                            
+evalPrintReturn str (stabl, dict) = do let expr = parseStablUnsafely str
+                                       let result = newApply expr dict stabl
+                                       putStrLn $ show result 
+                                       return (result, dict)
+                                       
+emptyState = ([], Map.empty)
 
-until_ :: (String -> Bool) -> IO String -> [Stabl] -> IO [Stabl]
-until_ pred prompt stabl = do
+until_ :: (String -> Bool) -> IO String -> ([Stabl], Map.Map String [Stabl]) -> IO ([Stabl], Map.Map String [Stabl])
+until_ pred prompt state = do
   result <- prompt
   if pred result
-     then return [] -- obs: var return ()
-     else do stabl' <- evalPrintReturn result stabl
-             until_ pred prompt stabl'
+     then return emptyState -- obs: var return ()
+     else do -- putStrLn result -- debug
+             state' <- evalPrintReturn result state
+             until_ pred prompt state'
           
 -- Loop infinitely until "quit" command
-runRepl :: IO [Stabl]
-runRepl = until_ (== "quit") (readPrompt "Stabl>>> ") []
+runRepl :: IO ([Stabl], Map.Map String [Stabl])
+runRepl = until_ (== "quit") (readPrompt "Stabl>>> ") emptyState
 
-main :: IO [Stabl]
+main :: IO ([Stabl], Map.Map String [Stabl])
 main = do args <- getArgs -- trenger ingen argument
           -- number of arguments
           case length args of 0 -> runRepl
-                              otherwise -> return [] -- for å få det til å kompilere
+                              otherwise -> return emptyState -- for å få det til å kompilere
 
 
 

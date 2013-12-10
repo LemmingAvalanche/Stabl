@@ -18,7 +18,12 @@ defList2 = def1 ++ "   " ++ def2 ++ "  " ++ def1
 expectedDefList2 = expectedDef1 ++ expectedDef2 ++ expectedDef1
 
 -- All tests
-tests = TestList [TestLabel "test1" testDef1GivesNoError, TestLabel "test2" testDef1ParsesCorrectly, TestLabel "test3" testDef1ParsesCorrectly, TestLabel "test4" testDefList1ParsesCorrectly, TestLabel "test5" testDefList2ParsesCorrectly]
+tests = TestList [ TestLabel "test1" testDef1GivesNoError
+                 , TestLabel "test2" testDef1ParsesCorrectly
+                 , TestLabel "test3" testDef1ParsesCorrectly
+                 , TestLabel "test4" testDefList1ParsesCorrectly
+                 , TestLabel "test5" testDefList2ParsesCorrectly
+                 ]
 
 testDef1GivesNoError = TestCase $ assertBool 
                       "The definition gave an error" 
