@@ -2,6 +2,10 @@ module Interpreter
        (
          parseCheckAndInterpret
        , interpret
+       , getStack
+       , getResult
+       , getReturn
+       , newApply
        ) where
 
 import Data.Char (isDigit)
@@ -53,15 +57,15 @@ apply quot (dict, stack) = apply' quot stack
   where apply' [] stack' = stack'
         apply' (x:xs) stack' = apply' xs $ getResult $ interpret (x:stack') dict
 
-newApply :: [Stabl] -> Map.Map String [Stabl] ->  [Stabl] -> [Stabl]
-newApply stack dict quot = getResult $ interpret (quot ++ stack) dict --- ...eller reverse quot?
+newApply :: [Stabl] -> Map.Map String [Stabl] -> [Stabl] -> [Stabl]
+newApply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict --- ...eller reverse quot?
 
 -- TODO: implement checking
 parseCheckAndInterpret :: String -> [Stabl]
-parseCheckAndInterpret s = getResult $ interpret program undefined -- TODO: dict is undefined!!
+parseCheckAndInterpret s = getResult $ interpret program Map.empty -- TODO: Map is empty
   where program = case parseStabl "" s
                   of Right pro -> pro
-                     Left parseError -> error (show parseError)
+                     Left parseError -> error $ show parseError
                      -- Left ParseError -> error "parse error!"
 
 -- | interpret a program given by a quotation.

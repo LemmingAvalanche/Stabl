@@ -6,6 +6,7 @@ module Parser
        , Quot
        , parseDecl
        , parseStabl
+       , parseStablUnsafely
        ) where
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))
@@ -89,3 +90,6 @@ whitespace1 = many1 space
 
 parseStabl :: SourceName -> String -> Either ParseError [Stabl]
 parseStabl = parse sequenceStablToken
+
+parseStablUnsafely :: String -> [Stabl]
+parseStablUnsafely str = case parseStabl "" str of Right expr -> expr

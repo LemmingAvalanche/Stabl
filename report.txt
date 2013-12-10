@@ -1,0 +1,22 @@
+Report, Term Project
+
+Vision
+
+I was initially planning on making a Forth-like language because of its simplicity, both conceptually and when it comes to implementation. I wanted to make a language that was very simple and also very easy to expand - for example by making it possible to define ones own "control structures" such as if-expressions/statements simply as functions ("words" in my languages). I was also intriguied by the idea of homoiconicity, or "code is data". I thought it would be possible to make a concatenative language that would be as homoiconic as a Lisp. I also wanted it to be very interactive, promoting a kind of """investigative programming style""" (!!!!). The last part was influenced by the fact that I decided to focus on using so called "stack combinators, functions that manipulate the elements of the stack, instead of letting the programmer define and call variables. This is a common concatenative programming practice, perhaps because this lets you use the stack more directly rather than manipulating registers. This practice seems very cumbersome, but it can admit some benefits, such as not having to bother about garbage collection; if you can only create and use a value once, which often is the way you use values with stack combinators, then you do not have to worry about manually freeing or garbage collecting those values (obviously this depends on the implementation of the stack); these are so-called linear types. This might be problematic, though, for large datatypes, such as large arrays. 
+
+The Plan
+
+???
+
+The Technologies
+
+I implemented the prototype of Stabl in Haskell with the usual tools, like GHC (compiler) and GHCi (interpreter). I also used Parsec, a library. There are more specialized libraries for programming language parsing, some of which are sub-libraries of Parsec, but I used the most common ones. 
+
+Implementation
+
+The implementation consists of a parser, an interpreter, a simple static checker and a REPL. I used Parsec for parsing, as I mentioned, which is a parser combinator library. This basically means that it lets you define parsers and combine them, essentially letting you define composable parsers. <EKSEMPEL>
+
+The interpreter uses techniques like we used in Rascal for the exercises; Haskell only has pure functions, so one has to pass in all the parameters that a function needs to compute its result (eg. there can not be any implicit, global variables that a normal function refers to and uses). This turned out to be fine in the beginning, but I found that it would soon become messy if I had a lot of variables to pass around between each call to the interpreter. The interpreter needs the current stack of the program, the stack that has been consumed(?????????????????) and a map of strings to word-definitions. A more thourough implementation would also have used a return stack, which is a stack that can be used to store things like local variables, but more crucially the address of the return-function; this was not a concern since I was building an interpreter in Haskell, but something like this would have been necessary in a compiled language. 
+
+(Motivation)
+I wanted to implement a small prototype of a concatenative language because I was intriguied by this programming paradigm/style. Concatenative languages are not just very unusual syntactically, as one often only have postfix operators at ones disposal. The fact that one is operating on an (implicit) stack also seems to deeply influence how you program. One example of this is using so-called "stack combinators", operators that 

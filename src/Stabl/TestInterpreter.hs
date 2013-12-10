@@ -10,6 +10,8 @@ tests = TestList [ TestLabel "test1" testDef1
                  , TestLabel "test6" testDef6
                  , TestLabel "test7" testDef7
                  , TestLabel "test8" testDef8
+                 , TestLabel "test9" testDef9
+                 , TestLabel "test10" testDef10
                   ]
  
 prog1 = parseCheckAndInterpret "2 dup"
@@ -38,6 +40,12 @@ res7 = [Lit 5, Lit 4, Lit 3, Lit 2, Lit 1] -- ...eller motsatt rekkefølge?
 prog8 = parseCheckAndInterpret "[1 2 3 4 5]" 
 res8 = [Quotation [Lit 1, Lit 2, Lit 3, Lit 4, Lit 5]] -- ... eller motsatt?
 
+prog9 = parseCheckAndInterpret "1 2 3 [4 5 6 7 8] apply"
+res9 = [Lit 8, Lit 7, Lit 6, Lit 5, Lit 4, Lit 3, Lit 2, Lit 1]
+
+prog10 = parseCheckAndInterpret "2 2 [add] apply"
+res10 = [Lit 4]
+
 testDef prog res = TestCase $ assertBool 
                    ("Failure: expected: " ++ (show res) ++ ", but got: " ++ (show prog)) 
                    $ prog == res
@@ -50,4 +58,5 @@ testDef5 = testDef prog5 res5
 testDef6 = testDef prog6 res6
 testDef7 = testDef prog7 res7
 testDef8 = testDef prog8 res8
-
+testDef9 = testDef prog9 res9
+testDef10 = testDef prog10 res10
