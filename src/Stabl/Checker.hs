@@ -1,4 +1,4 @@
--- | Type checking and general static semantic analysis.
+-- | Type checking and general semantic analysis.
 import Data.List
 import Data.Function (on)
 import Data.Maybe (catMaybes)
@@ -7,7 +7,6 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
 import Parser
-
 
 {- -- Helper functions for Checker -- -}
 

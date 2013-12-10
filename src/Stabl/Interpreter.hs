@@ -22,24 +22,23 @@ dup [] = error underflow
 dup (x:xs) = x:x:xs
 
 -- | See - Forth
--- TODO: implement instead with more general word?
 swap [] = error underflow
 swap [_] = error underflow
 swap (x:y:xs) = y:x:xs
 
--- | Rotate. See - Forth
-
+-- | See - Forth
 rot [] = error underflow
 rot [_] = error underflow
 rot [_,_] = error underflow
 rot (x:y:z:xs) = z:x:y:xs
 
+-- | See - Forth
 over [] = error underflow
 over [_] = error underflow
 over (x:y:xs) = y:x:y:xs
 
 apply :: [Stabl] -> Map.Map String [Stabl] -> [Stabl] -> [Stabl]
-apply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict --- ...eller reverse quot?
+apply stack dict quot = getResult $ interpret ((reverse quot) ++ stack) dict
 
 -- TODO: implement checking
 parseCheckAndInterpret :: String -> Map.Map String [Stabl] -> [Stabl]

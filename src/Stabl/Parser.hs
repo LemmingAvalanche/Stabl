@@ -17,7 +17,7 @@ import Control.Applicative
 
 -- defines a word (function)
 -- Syntax:
---   def <name> { Stabl* }
+--   def <name> {Stabl*}
 def = "def"
 openDef = "{"
 closeDef = "}"
@@ -27,26 +27,23 @@ closeQuot = "]"
 
 type WordDef = (Word, Quot)
 
--- TODO: give better name
-data Choice = Stabl | Quot deriving (Show,Read,Eq,Ord)
-
 type Word = String
 -- quotation. see: cat-lang
 -- NOTE: can use Quot as a collection/list: don't need a separate collection/list syntax and semantics
---- (though should probably have some primitive functions, like cons and append).
+-- (should probably have some primitive functions for this, like cons and append).
 type Quot = [Stabl] 
 
 data Stabl = WordCall Word
            | Quotation Quot
            | Lit Int    -- Literal
-                 deriving (Show,Read,Eq,Ord) -- more?
+                 deriving (Show,Read,Eq,Ord) 
 
 -- | A word definition  
 wordDef :: Parser WordDef
 wordDef =  (string  def *> whitespace1) -- "def"
            *> liftA2 (,)                -- (,) is the tuple constructor: (,) a b = (a,b)
            (word' <* whitespace1)       -- name of the word
-           definitionBody               -- { Stabl* }
+           definitionBody               -- {Stabl*}
            
 parseWordDef = parse wordDef
 

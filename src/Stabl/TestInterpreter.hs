@@ -42,7 +42,7 @@ prog7 = parseCheckAndInterpret "[1 2 3 4 5] apply" Map.empty
 res7 = [Lit 5, Lit 4, Lit 3, Lit 2, Lit 1] -- ...eller motsatt rekkefølge?
  
 prog8 = parseCheckAndInterpret "[1 2 3 4 5]" Map.empty
-res8 = [Quotation [Lit 1, Lit 2, Lit 3, Lit 4, Lit 5]] -- ... eller motsatt?
+res8 = [Quotation [Lit 1, Lit 2, Lit 3, Lit 4, Lit 5]] 
 
 prog9 = parseCheckAndInterpret "1 2 3 [4 5 6 7 8] apply" Map.empty
 res9 = [Lit 8, Lit 7, Lit 6, Lit 5, Lit 4, Lit 3, Lit 2, Lit 1]
@@ -50,7 +50,7 @@ res9 = [Lit 8, Lit 7, Lit 6, Lit 5, Lit 4, Lit 3, Lit 2, Lit 1]
 prog10 = parseCheckAndInterpret "2 2 [add] apply" Map.empty
 res10 = [Lit 4]
 
--- executing built-in words
+-- executing user defined words
 mySqr = [WordCall "dup", WordCall "mul"]
 words11 = Map.fromList [("mySqr", mySqr)] :: Map.Map String [Stabl]
 
