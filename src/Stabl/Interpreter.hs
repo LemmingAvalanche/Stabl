@@ -134,10 +134,10 @@ ifSuccessComb stack dict retStack comb = eitherR
                                          (\res -> interpret' (stack, dict, res)) 
                                          (comb retStack)
 
-eval :: [Stabl] -> (Int -> Int -> Int) -> CanErr [Stabl]
+eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
                     y = eitherR top (pop stack) 
-                    res = liftA2 op (get y) (get x) :: CanErr Int
+                    res = liftA2 op (get y) (get x) :: CanErr Integer
                        where get = eitherR 
                                    (\res -> case res of 
                                                    WordCall s -> Left $ TypeMismatchErr { expected = "an int", actual = "the word: " ++ s }

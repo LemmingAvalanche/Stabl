@@ -35,7 +35,7 @@ type Quot = [Stabl]
 
 data Stabl = WordCall Word
            | Quotation Quot
-           | Lit Int    -- Literal
+           | Lit Integer    -- Literal
                  deriving (Read,Eq,Ord) 
                           
 instance Show Stabl where
