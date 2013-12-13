@@ -5,6 +5,7 @@ module Interpreter
        , apply
        ) where
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Error
 import qualified Data.Map as Map
 
@@ -79,13 +80,6 @@ parseCheckAndInterpret s dict = either
 interpret :: [Stabl] -> Dict -> CanErr [Stabl]
 interpret s dict = interpret' (s, dict , [])
 
--- Data stack
--- newtype Stack a = Stack { getStack :: [a] }
--- Return stack
--- newtype Return a = Return { getReturn :: [a] }
--- Result stack
--- newtype Result a = Result { getResult :: [a] }
-
 interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl]
 interpret' ([], dict, stack) = case (head stack) of 
   Lit num    -> Right stack
@@ -112,7 +106,7 @@ interpret' (WordCall s : xs, dict, stack) =
             "over"  -> ifSuccessComb xs dict stack over 
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> eitherR (\res -> interpret' (xs, dict, res)) (apply quot dict tail')
+            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (\res -> interpret' (xs, dict, res)) 
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
                                          , actual = "the word: " ++ (show other)}
@@ -130,9 +124,9 @@ ifSuccessArithmetic stack' dict' op = eitherR
                                       (\res -> interpret' (stack', dict', res)) 
                                       (eval stack' op)
 
-ifSuccessComb stack dict retStack comb = eitherR
-                                         (\res -> interpret' (stack, dict, res)) 
-                                         (comb retStack)
+ifSuccessComb stack dict retStack comb = (comb retStack) >>= (\res -> interpret' (stack, dict, res)) 
+                                         
+                                         
 
 eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
@@ -146,7 +140,7 @@ eval stack op = let x = top stack
 
 -- | Evaluates the right value in the first given function if Right value and returns an either value; propagates the error if Left value
 eitherR :: (b -> Either a c) -> Either a b -> Either a c
-eitherR = either Left         
+eitherR = either Left -- OBS: er eigentleg kun flip (>>=)!! Bør refaktorerast.
 
 
 
