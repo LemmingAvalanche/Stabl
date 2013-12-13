@@ -36,7 +36,12 @@ type Quot = [Stabl]
 data Stabl = WordCall Word
            | Quotation Quot
            | Lit Int    -- Literal
-                 deriving (Show,Read,Eq,Ord) 
+                 deriving (Read,Eq,Ord) 
+                          
+instance Show Stabl where
+  show (WordCall w) = w
+  show (Quotation q) = show q
+  show (Lit i) = show i
 
 -- | A word definition  
 wordDef :: Parser WordDef
