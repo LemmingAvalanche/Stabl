@@ -8,6 +8,8 @@ import qualified Data.Map as Map
 import Parser
 import Interpreter
 
+
+
 flushStr :: String -> IO ()
 flushStr str =    putStr str 
                >> hFlush stdout
@@ -15,19 +17,28 @@ flushStr str =    putStr str
 readPrompt :: String -> IO String
 readPrompt prompt =    flushStr prompt 
                     >> getLine              
-                    
-evalPrintReturn :: String -> ([Stabl], Map.Map String [Stabl]) -> IO ([Stabl] ,Map.Map String [Stabl])
-evalPrintReturn str@('d':'e':'f':rest) (stabl,dict) = let (name, body) = parseWordDefUnsafely str
-                                                          in do putStrLn $ "new word defined: " ++ name
-                                                                return (stabl, Map.insert name body dict) 
-evalPrintReturn str (stabl, dict) = do let expr = parseStablUnsafely str
-                                       let result = apply expr dict stabl
-                                       putStrLn $ show result 
-                                       return (result, dict)                                       
+
+-- TODO: check word-definitions, such as if it only uses words that have been defined at this point?
+evalPrintReturn :: String -> ([Stabl], Dict) -> IO ([Stabl], Dict)
+evalPrintReturn str@('d':'e':'f':' ':rest) (stabl,dict) = case parseWordDef "" str of Left err -> putStrLn (show err)
+                                                                                               >> return (stabl, dict)
+                                                                                      Right (name, body) -> putStrLn ("new word defined: " ++ name)
+                                                                                                            >> return (stabl, Map.insert name body dict)
+  
+evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStrLn (show err)
+                                                                       >> return (stabl, dict)
+                                                              Right expr -> let result = apply expr dict stabl
+                                                                            in case result of Left err' -> putStrLn (show err') 
+                                                                                                           >> return (stabl, dict)
+                                                                                              Right stabl' -> putStrLn (show stabl') 
+                                                                                                              >> return (stabl', dict)
                                        
 emptyState = ([], Map.empty)
 
-until_ :: (String -> Bool) -> IO String -> ([Stabl], Map.Map String [Stabl]) -> IO ([Stabl], Map.Map String [Stabl])
+
+
+
+until_ :: (String -> Bool) -> IO String -> ([Stabl], Dict) -> IO ([Stabl], Dict)
 until_ pred prompt state = do
   result <- prompt
   if pred result
@@ -36,10 +47,10 @@ until_ pred prompt state = do
              until_ pred prompt state'
           
 -- Loop infinitely until "quit" command
-runRepl :: IO ([Stabl], Map.Map String [Stabl])
+runRepl :: IO ([Stabl], Dict)
 runRepl = until_ (== "quit") (readPrompt "Stabl>>> ") emptyState
 
-main :: IO ([Stabl], Map.Map String [Stabl])
+main :: IO ([Stabl], Dict)
 main = do args <- getArgs 
           -- number of arguments
           case length args of 0 -> runRepl

@@ -3,6 +3,7 @@ module Interpreter
          parseCheckAndInterpret
        , interpret
        , apply
+       , Dict
        ) where
 import Control.Applicative
 import Control.Monad
@@ -24,10 +25,12 @@ instance Error StablErr where
   noMsg = Default "An error has occured"
   strMsg = Default
 
-showErr (StackUnderflow str) = "Stack underflow: the combinator " ++ str ++ " was called on the stack, but there were not enough elements on the stack."
-showErr (Parser err) = show err
-showErr (TypeMismatchErr exp act) = "Typemismatch error: expected " ++ exp ++ ", but got " ++ act
-showErr (UndefinedWord str) = "Undefined word error: tried to call word " ++ str ++ ", but it is not defined."
+instance Show StablErr where
+  show (StackUnderflow str) = "Stack underflow: the combinator " ++ str ++ " was called on the stack, but there were not enough elements on the stack."
+  show (Parser err) = show err
+  show (TypeMismatchErr exp act) = "Typemismatch error: expected " ++ exp ++ ", but got " ++ act
+  show (UndefinedWord str) = "Undefined word error: tried to call word " ++ str ++ ", but it is not defined."
+  show (Default str) = str
 
 type CanErr = Either StablErr
 
