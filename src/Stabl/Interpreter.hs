@@ -86,7 +86,8 @@ interpret :: [Stabl] -> Dict -> CanErr [Stabl]
 interpret s dict = interpret' (s, dict , [])
 
 interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl]
-interpret' ([], dict, stack) = case (head stack) of 
+interpret' ([], dict, []) = Right []
+interpret' ([], dict, stack) = case (head stack) of
   Lit num    -> Right stack
   Quotation quot' -> Right stack
   WordCall w -> Left $ TypeMismatchErr {
