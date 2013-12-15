@@ -3,6 +3,7 @@ module Interpreter
          parseCheckAndInterpret
        , interpret
        , apply
+       , CanErr
        , Dict
        ) where
 import Control.Applicative
@@ -111,14 +112,14 @@ interpret' (WordCall s : xs, dict, stack) =
             "over"  -> ifSuccessComb xs dict stack over 
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (resApplyInterpret' stack dict)
+            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (resApplyInterpret' xs dict)
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
                                          , actual = "the word: " ++ (show other)}
               where head' = head stack
                     tail' = tail stack
             -- user-defined word 
-            other   -> case lookup' of Just wordBody -> (apply wordBody dict stack) >>= (resApplyInterpret' stack dict)
+            other   -> case lookup' of Just wordBody -> (apply wordBody dict stack) >>= (resApplyInterpret' xs dict)
                                        Nothing       -> Left $ UndefinedWord other
               where lookup' = Map.lookup other dict
 
