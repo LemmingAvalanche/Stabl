@@ -92,7 +92,6 @@ interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation 
 interpret' (WordCall s : xs, dict, stack) = 
    case s of 
             -- built-in words
-     -- TODO: refactor duplication
             "add"   -> ifSuccessArithmetic xs dict (+)
             "minus" -> ifSuccessArithmetic xs dict (-)
             "mul"   -> ifSuccessArithmetic xs dict (*)
@@ -106,37 +105,41 @@ interpret' (WordCall s : xs, dict, stack) =
             "over"  -> ifSuccessComb xs dict stack over 
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (\res -> interpret' (xs, dict, res)) 
+            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (resApplyInterpret' stack dict)
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
                                          , actual = "the word: " ++ (show other)}
               where head' = head stack
                     tail' = tail stack
             -- user-defined word 
-            other   -> case lookup' of Just wordBody -> eitherR 
-                                                        (\res -> interpret' (xs, dict, res)) 
-                                                        (apply wordBody dict stack) 
+            other   -> case lookup' of Just wordBody -> (apply wordBody dict stack) >>= (resApplyInterpret' stack dict)
                                        Nothing       -> Left $ UndefinedWord other
               where lookup' = Map.lookup other dict
 
 -- TODO: move to where-clase in interpret'?
-ifSuccessArithmetic stack' dict' op = eitherR 
-                                      (\res -> interpret' (stack', dict', res)) 
-                                      (eval stack' op)
+ifSuccessArithmetic stack' dict' op = (eval stack' op) 
+                                      >>= 
+                                      (resApplyInterpret' stack' dict')
+                                      
+                                      
 
-ifSuccessComb stack dict retStack comb = (comb retStack) >>= (\res -> interpret' (stack, dict, res)) 
+ifSuccessComb stack dict retStack comb = (comb retStack) 
+                                         >>= 
+                                         (resApplyInterpret' stack dict)
                                          
-                                         
+resApplyInterpret' stack dict res = interpret' (stack, dict, res)                                         
 
 eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
-                    y = eitherR top (pop stack) 
-                    res = liftA2 op (get y) (get x) :: CanErr Integer
-                       where get = eitherR 
+                    y = (pop stack) >>= top
+                    res = liftA2 op (get y) (get x)
+                       where get = (>>=
                                    (\res -> case res of 
                                                    WordCall s -> Left $ TypeMismatchErr { expected = "an int", actual = "the word: " ++ s }
                                                    Lit n -> Right n)
-                 in eitherR (\result -> Right $ (Lit result):stack'') res where stack'' = tail $ tail stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
+                                   )
+                 in res >>= (\result -> return $ (Lit result):stack'') 
+  where stack'' = tail $ tail stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
 
 -- | Evaluates the right value in the first given function if Right value and returns an either value; propagates the error if Left value
 eitherR :: (b -> Either a c) -> Either a b -> Either a c
