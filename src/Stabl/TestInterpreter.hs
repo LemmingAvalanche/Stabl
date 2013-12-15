@@ -17,47 +17,54 @@ tests = TestList [ TestLabel "test1" testDef1
                  , TestLabel "test11" testDef11
                  , TestLabel "test12" testDef12
                   ]
- 
-prog1 = parseCheckAndInterpret "2 dup" Map.empty
+
+
+
+fromEither (Right val) = val
+fromEither (Left err) = error $ "shouldn't happen! Here is the error: " ++ (show err)
+parseCheckAndInterpretUnsafely = fromEither .: parseCheckAndInterpret 
+(.:) = (.) . (.)
+
+prog1 = parseCheckAndInterpretUnsafely "2 dup" Map.empty
 res1 = [Lit 2, Lit 2]
 
-prog2 = parseCheckAndInterpret "4 dup mul" Map.empty
+prog2 = parseCheckAndInterpretUnsafely "4 dup mul" Map.empty
 res2 = [Lit 16]
 
-prog3 = parseCheckAndInterpret "4 2 over add add" Map.empty
+prog3 = parseCheckAndInterpretUnsafely "4 2 over add add" Map.empty
 res3 = [Lit 10]
 
-prog4 = parseCheckAndInterpret "2 2 swap swap swap" Map.empty
+prog4 = parseCheckAndInterpretUnsafely "2 2 swap swap swap" Map.empty
 res4 = [Lit 2, Lit 2]
 
-prog5 = parseCheckAndInterpret "2 4 over over dup" Map.empty
+prog5 = parseCheckAndInterpretUnsafely "2 4 over over dup" Map.empty
 res5 = [Lit 4, Lit 4, Lit 2, Lit 4, Lit 2]
 
-prog6 = parseCheckAndInterpret "2 4 6 mul dup add over 5" Map.empty
+prog6 = parseCheckAndInterpretUnsafely "2 4 6 mul dup add over 5" Map.empty
 res6 = [Lit 5, Lit 2, Lit 48, Lit 2]
 
 -- word definitions and quotations
 
-prog7 = parseCheckAndInterpret "[1 2 3 4 5] apply" Map.empty
+prog7 = parseCheckAndInterpretUnsafely "[1 2 3 4 5] apply" Map.empty
 res7 = [Lit 5, Lit 4, Lit 3, Lit 2, Lit 1] -- ...eller motsatt rekkefølge?
  
-prog8 = parseCheckAndInterpret "[1 2 3 4 5]" Map.empty
+prog8 = parseCheckAndInterpretUnsafely "[1 2 3 4 5]" Map.empty
 res8 = [Quotation [Lit 1, Lit 2, Lit 3, Lit 4, Lit 5]] 
 
-prog9 = parseCheckAndInterpret "1 2 3 [4 5 6 7 8] apply" Map.empty
+prog9 = parseCheckAndInterpretUnsafely "1 2 3 [4 5 6 7 8] apply" Map.empty
 res9 = [Lit 8, Lit 7, Lit 6, Lit 5, Lit 4, Lit 3, Lit 2, Lit 1]
 
-prog10 = parseCheckAndInterpret "2 2 [add] apply" Map.empty
+prog10 = parseCheckAndInterpretUnsafely "2 2 [add] apply" Map.empty
 res10 = [Lit 4]
 
 -- executing user defined words
 mySqr = [WordCall "dup", WordCall "mul"]
 words11 = Map.fromList [("mySqr", mySqr)] :: Map.Map String [Stabl]
 
-prog11 = parseCheckAndInterpret "3 4 [dup mul] apply" Map.empty
+prog11 = parseCheckAndInterpretUnsafely "3 4 [dup mul] apply" Map.empty
 res11 = [Lit 16, Lit 3]
 
-prog12 = parseCheckAndInterpret "3 4 mySqr" words11
+prog12 = parseCheckAndInterpretUnsafely "3 4 mySqr" words11
 res12 = [Lit 16, Lit 3]
 
 testDef prog res = TestCase $ assertBool 

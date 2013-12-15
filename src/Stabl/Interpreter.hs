@@ -132,6 +132,7 @@ ifSuccessComb stack dict retStack comb = (comb retStack)
                                          
 resApplyInterpret' stack dict res = interpret' (stack, dict, res)                                         
 
+-- TODO: I think this has a bug: using arithmetic seems to always give errors relatingt to stack combinators, but just using a stack combinator by itself in the REPL does Not give errors. 
 eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
                     y = (pop stack) >>= top
@@ -143,10 +144,6 @@ eval stack op = let x = top stack
                                    )
                  in res >>= (\result -> return $ (Lit result):stack'') 
   where stack'' = tail $ tail stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
-
--- | Evaluates the right value in the first given function if Right value and returns an either value; propagates the error if Left value
-eitherR :: (b -> Either a c) -> Either a b -> Either a c
-eitherR = either Left -- OBS: er eigentleg kun flip (>>=)!! Bør refaktorerast.
 
 
 
