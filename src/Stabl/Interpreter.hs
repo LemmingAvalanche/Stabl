@@ -96,15 +96,12 @@ interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation 
 interpret' (WordCall s : xs, dict, stack) = 
    case s of 
             -- built-in words
-            -- TODO: definitivt (ein) bug her!!!
-            "add"   -> do  -- TODO: refactor
-              success <- ifSuccessArithmetic stack dict (+)
-              interpret' (xs, dict, success)
-            "minus" -> ifSuccessArithmetic stack dict (-)
-            "mul"   -> do
-                       success <- ifSuccessArithmetic stack dict (*)
-                       interpret' (xs, dict, success)
-            "div"   -> ifSuccessArithmetic stack dict div 
+            -- OBS: fortsatt bug her? eller fiksa eg alt som var gale her?
+            "add"   -> ifSuccessArithmetic xs stack dict (+)
+             
+            "minus" -> ifSuccessArithmetic xs stack dict (-)
+            "mul"   -> ifSuccessArithmetic xs stack dict (*)
+            "div"   -> ifSuccessArithmetic xs stack dict div 
               
             -- built-in stack combinators 
             "pop"   -> ifSuccessComb xs dict stack pop 
@@ -126,12 +123,10 @@ interpret' (WordCall s : xs, dict, stack) =
               where lookup' = Map.lookup other dict
 
 -- TODO: move to where-clase in interpret'?
-ifSuccessArithmetic stack' dict' op = (eval stack' op) 
-                                      >>= 
-                                      (resApplyInterpret' stack' dict')
+ifSuccessArithmetic stack retStack dict' op = (eval retStack op) 
+                                              >>= 
+                                              (resApplyInterpret' stack dict')
                                       
-                                      
-
 ifSuccessComb stack dict retStack comb = (comb retStack) 
                                          >>= 
                                          (resApplyInterpret' stack dict)
