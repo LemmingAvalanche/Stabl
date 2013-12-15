@@ -26,7 +26,8 @@ instance Error StablErr where
   strMsg = Default
 
 instance Show StablErr where
-  show (StackUnderflow str) = "Stack underflow: the combinator " ++ str ++ " was called on the stack, but there were not enough elements on the stack."
+  show (StackUnderflow str) = "Stack underflow: the combinator " ++ 
+                              str ++ " was called on the stack, but there were not enough elements on the stack."
   show (Parser err) = show err
   show (TypeMismatchErr exp act) = "Typemismatch error: expected " ++ exp ++ ", but got " ++ act
   show (UndefinedWord str) = "Undefined word error: tried to call word " ++ str ++ ", but it is not defined."
@@ -89,16 +90,21 @@ interpret' ([], dict, stack) = case (head stack) of
   Quotation quot' -> Right stack
   WordCall w -> Left $ TypeMismatchErr {
     expected = "a stack with only values"
-    , actual = "an unevaluated word"}
+    , actual = "an unevaluated word" }
 interpret' (Lit n : xs, dict, stack) = interpret' (xs, dict, Lit n : stack)
 interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation quot : stack)
 interpret' (WordCall s : xs, dict, stack) = 
    case s of 
             -- built-in words
-            "add"   -> ifSuccessArithmetic xs dict (+)
-            "minus" -> ifSuccessArithmetic xs dict (-)
-            "mul"   -> ifSuccessArithmetic xs dict (*)
-            "div"   -> ifSuccessArithmetic xs dict div 
+            -- TODO: definitivt (ein) bug her!!!
+            "add"   -> do  -- TODO: refactor
+              success <- ifSuccessArithmetic stack dict (+)
+              interpret' (xs, dict, success)
+            "minus" -> ifSuccessArithmetic stack dict (-)
+            "mul"   -> do
+                       success <- ifSuccessArithmetic stack dict (*)
+                       interpret' (xs, dict, success)
+            "div"   -> ifSuccessArithmetic stack dict div 
               
             -- built-in stack combinators 
             "pop"   -> ifSuccessComb xs dict stack pop 
@@ -132,7 +138,6 @@ ifSuccessComb stack dict retStack comb = (comb retStack)
                                          
 resApplyInterpret' stack dict res = interpret' (stack, dict, res)                                         
 
--- TODO: I think this has a bug: using arithmetic seems to always give errors relatingt to stack combinators, but just using a stack combinator by itself in the REPL does Not give errors. 
 eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
                     y = (pop stack) >>= top
@@ -143,7 +148,7 @@ eval stack op = let x = top stack
                                                    Lit n -> Right n)
                                    )
                  in res >>= (\result -> return $ (Lit result):stack'') 
-  where stack'' = tail $ tail stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
+  where stack'' = (tail . tail) stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
 
 
 
