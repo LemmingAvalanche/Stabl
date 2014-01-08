@@ -1,0 +1,25 @@
+[dup *] 'sqr def
+
+'dup 'duplicate alias
+
+[1 +] 'inc def
+
+1 1 inc inc + # 4
+
+> ["bigger"] ["smaller"] if
+
+[4 'four <-] let four four + out # ESCAPE THE SCOPE
+
+[2 2 + 'four <- 3 3 + 'nine <-] let four nine + out
+
+[
+'fst <-
+'snd <-
+fst snd > [fst] [snd] if
+] 'max def 
+
+[
+2over > [fst] [snd] if
+] 'maxi def
+
+[over over] '2over def
