@@ -88,12 +88,12 @@ interpret s dict = interpret' (s, dict , [])
 interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl]
 interpret' ([], dict, []) = Right []
 interpret' ([], dict, stack) = case (head stack) of
-  Lit num    -> Right stack
+  LitInt num    -> Right stack
   Quotation quot' -> Right stack
   WordCall w -> Left $ TypeMismatchErr {
     expected = "a stack with only values"
     , actual = "an unevaluated word" }
-interpret' (Lit n : xs, dict, stack) = interpret' (xs, dict, Lit n : stack)
+interpret' (LitInt n : xs, dict, stack) = interpret' (xs, dict, LitInt n : stack)
 interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation quot : stack)
 interpret' (WordCall s : xs, dict, stack) = 
    case s of 
@@ -142,9 +142,9 @@ eval stack op = let x = top stack
                        where get = (>>=
                                    (\res -> case res of 
                                                    WordCall s -> Left $ TypeMismatchErr { expected = "an int", actual = "the word: " ++ s }
-                                                   Lit n -> Right n)
+                                                   LitInt n -> Right n)
                                    )
-                 in res >>= (\result -> return $ (Lit result):stack'') 
+                 in res >>= (\result -> return $ (LitInt result):stack'') 
   where stack'' = (tail . tail) stack -- Uses partial functions, BUT, this is safe since the evaluation can't have come this far if there indeed weren't at least two items on top of the stack, since then we would not have been able to use arithmetic on the top two elements of the stack. 
 
 

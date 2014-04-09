@@ -6,4 +6,5 @@ cabal-dev
 *.chs.h
 .virthualenv
 .hsenv
+*~
 cabal.config
