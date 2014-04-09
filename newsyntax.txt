@@ -19,7 +19,30 @@ fst snd > [fst] [snd] if
 ] 'max def 
 
 [
-2over > [fst] [snd] if
+2over > [drop] [swap drop] if
 ] 'maxi def
 
 [over over] '2over def
+
+# String interpolation
+
+[
+fst <-
+"This is $fst, everybody!" 
+] 'present def
+
+# String med interpolation der ein kan utføre ord _inne i_ strengen! :
+
+[
+"This is $pop, everybody!"
+] 'present def
+
+
+# def med type declaration:
+
+[[Num] [Num] ->] decl
+[dup *] 'sqr def
+
+[Num] [Num] -> # words pops one Num from the stack, and returns a new Num. 
+
+# ide: ting som begynner med store bokstavar er "terms"? Og ein implementerer type-sjekking ved å bruke terms som typer? 
