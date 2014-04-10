@@ -19,20 +19,20 @@ closeQuot = "]"
 -- TODO: implement
 -- NOTE: the only collection used should just be (homogenous?) list, for the time being
 openCollection = "("
-closeCollection = "("
+closeCollection = ")"
 -- Example: '(1 2 3 4)' should translate into '[1 2 3 4] list' (for now: might want to be polymorphic in the collection type).
 
 -- syntax sugar for tuples
 -- TODO: implement
 openTuple = "{"
-closeTuple = "{"
+closeTuple = "}" -- todo: change to somwething like < > instead...
 -- Example: '{1 2 "boat" 4}' should translate into '[1 2 "boat" 4] tuple'. (assuming that "boat" is a string in the language").
 
 -- TODO: implement
 -- TODO: should be able to nest?
 -- IDEA: have '/' built-in to the grammar of this as a an escape character? That way you can nest these things, or use « in it as a literal by using \«, as you please.
-openPulverize = "«"
-closePulverize = "»"
+openMinceQuote = "«"
+closeMinceQuote = "»"
 
 type Word = String
 -- quotation. see: cat-lang
