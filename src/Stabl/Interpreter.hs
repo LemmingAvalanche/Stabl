@@ -80,12 +80,11 @@ parseCheckAndInterpret s dict = either
                                 (\prog -> interpret prog dict) 
                                 (parseStabl "" s)
 
-
 -- | interpret a program given by a quotation.
 interpret :: [Stabl] -> Dict -> CanErr [Stabl]
 interpret s dict = interpret' (s, dict , [])
 
-interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl]
+interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl] -- return type should perhaps be CanErr ([Stabl], Dict) if I want the state of the dict after everything has been evaluated
 interpret' ([], dict, []) = Right []
 interpret' ([], dict, stack) = case (head stack) of
   LitInt num    -> Right stack
@@ -95,12 +94,16 @@ interpret' ([], dict, stack) = case (head stack) of
     , actual = "an unevaluated word" }
 interpret' (LitInt n : xs, dict, stack) = interpret' (xs, dict, LitInt n : stack)
 interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation quot : stack)
-interpret' (WordCall s : xs, dict, stack) = 
-   case s of 
+interpret' (WordCall s : xs, dict, stack) =
+            -- word definition
+  case s of "def" ->
+              case xs of Quotation [WordCall call] : Quotation body : rest -> interpret' (rest, Map.insert call body dict, stack)
+                         rest -> Left TypeMismatchErr {
+                           expected = "a quotation with a single word (name of word) and a quotation (the 'body' of the word)",
+                           actual = "the rest of the stack: " ++ show rest} 
             -- built-in words
             -- OBS: fortsatt bug her? eller fiksa eg alt som var gale her?
             "add"   -> ifSuccessArithmetic xs stack dict (+)
-             
             "minus" -> ifSuccessArithmetic xs stack dict (-)
             "mul"   -> ifSuccessArithmetic xs stack dict (*)
             "div"   -> ifSuccessArithmetic xs stack dict div 
