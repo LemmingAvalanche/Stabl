@@ -20,11 +20,6 @@ readPrompt prompt =    flushStr prompt
 
 -- TODO: check word-definitions, such as if it only uses words that have been defined at this point?
 evalPrintReturn :: String -> ([Stabl], Dict) -> IO ([Stabl], Dict)
-evalPrintReturn str@('d':'e':'f':' ':rest) (stabl,dict) = case parseWordDef "" str of Left err -> putStrLn (show err)
-                                                                                               >> return (stabl, dict)
-                                                                                      Right (name, body) -> putStrLn ("new word defined: " ++ name)
-                                                                                                            >> return (stabl, Map.insert name body dict)
-  
 evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStrLn (show err)
                                                                        >> return (stabl, dict)
                                                               Right expr -> let result = apply expr dict stabl
@@ -34,9 +29,6 @@ evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStr
                                                                                                               >> return (stabl', dict)
                                        
 emptyState = ([], Map.empty)
-
-
-
 
 until_ :: (String -> Bool) -> IO String -> ([Stabl], Dict) -> IO ([Stabl], Dict)
 until_ pred prompt state = do
