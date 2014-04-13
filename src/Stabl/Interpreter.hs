@@ -97,10 +97,10 @@ interpret' (Quotation quot : xs, dict, stack) = interpret' (xs, dict, Quotation 
 interpret' (WordCall s : xs, dict, stack) =
             -- word definition
   case s of "def" ->
-              case xs of Quotation [WordCall call] : Quotation body : rest -> interpret' (rest, Map.insert call body dict, stack)
-                         rest -> Left TypeMismatchErr {
-                           expected = "a quotation with a single word (name of word) and a quotation (the 'body' of the word)",
-                           actual = "the rest of the stack: " ++ show rest} 
+              case stack of Quotation [WordCall call] : Quotation body : rest -> interpret' (xs, Map.insert call body dict, rest)
+                            rest -> Left TypeMismatchErr {
+                              expected = "a quotation with a single word (name of word) and a quotation (the 'body' of the word)",
+                              actual = "the rest of the stack: " ++ show stack} 
             -- built-in words
             -- OBS: fortsatt bug her? eller fiksa eg alt som var gale her?
             "add"   -> ifSuccessArithmetic xs stack dict (+)
