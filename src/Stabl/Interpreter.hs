@@ -70,25 +70,25 @@ over [] = Left $ StackUnderflow "over"
 over [_] = Left $ StackUnderflow "over"
 over (x:y:xs) = Right $ y:x:y:xs
 
-apply :: [Stabl] -> Dict -> [Stabl] -> CanErr [Stabl]
+apply :: [Stabl] -> Dict -> [Stabl] -> CanErr ([Stabl], Dict)
 apply stack dict quot = interpret ((reverse quot) ++ stack) dict
  
 -- TODO: fix to make total
-parseCheckAndInterpret :: String -> Dict -> CanErr [Stabl]
+parseCheckAndInterpret :: String -> Dict -> CanErr ([Stabl], Dict)
 parseCheckAndInterpret s dict = either
                                 (Left . Parser)
                                 (\prog -> interpret prog dict) 
                                 (parseStabl "" s)
 
 -- | interpret a program given by a quotation.
-interpret :: [Stabl] -> Dict -> CanErr [Stabl]
+interpret :: [Stabl] -> Dict -> CanErr ([Stabl], Dict)
 interpret s dict = interpret' (s, dict , [])
 
-interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr [Stabl] -- return type should perhaps be CanErr ([Stabl], Dict) if I want the state of the dict after everything has been evaluated
-interpret' ([], dict, []) = Right []
-interpret' ([], dict, stack) = case (head stack) of
-  LitInt num    -> Right stack
-  Quotation quot' -> Right stack
+interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr ([Stabl], Dict) -- return type should perhaps be CanErr ([Stabl], Dict) if I want the state of the dict after everything has been evaluated
+interpret' ([], dict, []) = Right ([], dict) 
+interpret' ([], dict, stack) = case (head stack) of -- NOTE: head stack - unsafe?
+  LitInt num    -> Right (stack, dict)
+  Quotation quot' -> Right (stack, dict)
   WordCall w -> Left $ TypeMismatchErr {
     expected = "a stack with only values"
     , actual = "an unevaluated word" }
@@ -128,17 +128,21 @@ interpret' (WordCall s : xs, dict, stack) =
               where lookup' = Map.lookup other dict
 
 -- TODO: move to where-clase in interpret'?
+
+ifSuccessArithmetic :: [Stabl] -> [Stabl] -> Dict -> (Integer -> Integer -> Integer) -> CanErr ([Stabl], Dict)
 ifSuccessArithmetic stack retStack dict' op = (eval retStack op) 
                                               >>= 
-                                              (resApplyInterpret' stack dict')
-                                      
-ifSuccessComb stack dict retStack comb = (comb retStack) 
+                                              (resApplyInterpret' (stack, dict'))
+
+ifSuccessComb :: [Stabl] -> Dict -> [Stabl] -> ([Stabl] -> CanErr [Stabl]) -> CanErr ([Stabl], Dict)
+ifSuccessComb stack dict retStack comb = (fmap (\x -> (x,dict)) (comb retStack)) -- stack combinator functions return CanErr [Stabl], so we need to "inject" the dict into the result of the function call
                                          >>= 
                                          (resApplyInterpret' stack dict)
-                                         
-resApplyInterpret' stack dict res = interpret' (stack, dict, res)                                         
 
-eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
+resApplyInterpret' :: ([Stabl], Dict) -> [Stabl] -> CanErr ([Stabl], Dict)
+resApplyInterpret' (stack, dict) res = interpret' (stack, dict, res)                                         
+
+eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr ([Stabl], Dict)
 eval stack op = let x = top stack
                     y = (pop stack) >>= top
                     res = liftA2 op (get y) (get x)
