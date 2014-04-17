@@ -24,8 +24,8 @@ evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStr
                                                               Right expr -> let result = apply expr dict stabl
                                                                             in case result of Left err' -> putStrLn (show err') 
                                                                                                            >> return (stabl, dict)
-                                                                                              Right stabl' -> putStrLn (show stabl') 
-                                                                                                              >> return (stabl', dict)
+                                                                                              Right (stabl', dict') -> putStrLn (show stabl') 
+                                                                                                                       >> return (stabl', dict)
                                        
 emptyState = ([], Map.empty)
 
