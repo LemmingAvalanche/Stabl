@@ -86,7 +86,7 @@ interpret s dict = interpret' (s, dict , [])
 
 interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr ([Stabl], Dict) -- return type should perhaps be CanErr ([Stabl], Dict) if I want the state of the dict after everything has been evaluated
 interpret' ([], dict, []) = Right ([], dict) 
-interpret' ([], dict, stack) = case (head stack) of -- NOTE: head stack - unsafe?
+interpret' ([], dict, stack) = case (head stack) of
   LitInt num    -> Right (stack, dict)
   Quotation quot' -> Right (stack, dict)
   WordCall w -> Left $ TypeMismatchErr {
@@ -116,35 +116,36 @@ interpret' (WordCall s : xs, dict, stack) =
             "over"  -> ifSuccessComb xs dict stack over 
             
             -- applying a quotation 
-            "apply"   -> case head' of Quotation quot -> (apply quot dict tail') >>= (resApplyInterpret' xs dict)
+            -- OBS: all kode under dette bør kanskje refaktorerast
+            "apply"   -> case head' of Quotation quot -> (apply stack dict tail') >>= (\(res',dict') -> interpret' (xs, dict', res'))
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
-                                         , actual = "the word: " ++ (show other)}
+                                         , actual = "the word: " ++ show other}
               where head' = head stack
                     tail' = tail stack
-            -- user-defined word 
-            other   -> case lookup' of Just wordBody -> (apply wordBody dict stack) >>= (resApplyInterpret' xs dict)
+            -- user-defined word                        
+            other   -> case lookup' of Just wordBody -> apply stack dict wordBody >>= (\(ret',dict') -> interpret' (xs, dict', ret'))
                                        Nothing       -> Left $ UndefinedWord other
               where lookup' = Map.lookup other dict
 
 -- TODO: move to where-clase in interpret'?
 
 ifSuccessArithmetic :: [Stabl] -> [Stabl] -> Dict -> (Integer -> Integer -> Integer) -> CanErr ([Stabl], Dict)
-ifSuccessArithmetic stack retStack dict' op = (eval retStack op) 
-                                              >>= 
-                                              (resApplyInterpret' (stack, dict'))
+ifSuccessArithmetic stack retStack dict op = eval retStack op
+                                             >>= 
+                                             resApplyInterpret' (stack, dict)
 
 ifSuccessComb :: [Stabl] -> Dict -> [Stabl] -> ([Stabl] -> CanErr [Stabl]) -> CanErr ([Stabl], Dict)
-ifSuccessComb stack dict retStack comb = (fmap (\x -> (x,dict)) (comb retStack)) -- stack combinator functions return CanErr [Stabl], so we need to "inject" the dict into the result of the function call
+ifSuccessComb stack dict retStack comb = comb retStack -- stack combinator functions return CanErr [Stabl], so we need to "inject" the dict into the result of the function call
                                          >>= 
-                                         (resApplyInterpret' stack dict)
+                                         resApplyInterpret' (stack,dict)
 
 resApplyInterpret' :: ([Stabl], Dict) -> [Stabl] -> CanErr ([Stabl], Dict)
 resApplyInterpret' (stack, dict) res = interpret' (stack, dict, res)                                         
 
-eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr ([Stabl], Dict)
+eval :: [Stabl] -> (Integer -> Integer -> Integer) -> CanErr [Stabl]
 eval stack op = let x = top stack
-                    y = (pop stack) >>= top
+                    y = pop stack >>= top
                     res = liftA2 op (get y) (get x)
                        where get = (>>=
                                    (\res -> case res of 

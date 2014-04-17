@@ -1,5 +1,6 @@
--- REPL inspiried by the basic REPL described in Write Yourself a Lisp in 48 Hours
 
+
+-- REPL inspiried by the basic REPL described in Write Yourself a Lisp in 48 Hours
 import System.IO
 import System.Environment
 
@@ -7,8 +8,6 @@ import qualified Data.Map as Map
 
 import Parser
 import Interpreter
-
-
 
 flushStr :: String -> IO ()
 flushStr str =    putStr str 
