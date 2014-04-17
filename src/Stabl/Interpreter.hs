@@ -117,14 +117,14 @@ interpret' (WordCall s : xs, dict, stack) =
             
             -- applying a quotation 
             -- OBS: all kode under dette bør kanskje refaktorerast
-            "apply"   -> case head' of Quotation quot -> (apply stack dict tail') >>= (\(res',dict') -> interpret' (xs, dict', res'))
+            "apply"   -> case head' of Quotation quot -> apply quot dict tail' >>= \(res',dict') -> interpret' (xs, dict', res')
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
                                          , actual = "the word: " ++ show other}
               where head' = head stack
                     tail' = tail stack
             -- user-defined word                        
-            other   -> case lookup' of Just wordBody -> apply stack dict wordBody >>= (\(ret',dict') -> interpret' (xs, dict', ret'))
+            other   -> case lookup' of Just wordBody -> apply wordBody dict stack >>= (\(ret',dict') -> interpret' (xs, dict', ret'))
                                        Nothing       -> Left $ UndefinedWord other
               where lookup' = Map.lookup other dict
 
