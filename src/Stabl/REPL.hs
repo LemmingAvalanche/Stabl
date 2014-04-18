@@ -17,7 +17,7 @@ readPrompt :: String -> IO String
 readPrompt prompt =    flushStr prompt 
                     >> getLine              
 
--- TODO: check word-definitions, such as if it only uses words that have been defined at this point?
+-- This code looks pretty verbose - two levels of case of - but it's not simple to refactor into something sensible. The reason for this the different types that are used in the different steps of the function - parsing the line returns Either ParseError [Stabl], while the next step requires Either StablErr [Stabl], ie they are incompatible with regards to being chained monadically. It is perfectly doable to formulate this as a monadic computation, but what I ended up with was pretty unwieldy and probably not very readable - this version is verbose, but at least what is going on is pretty straightforward. 
 evalPrintReturn :: String -> ([Stabl], Dict) -> IO ([Stabl], Dict)
 evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStrLn (show err)
                                                                        >> return (stabl, dict)
