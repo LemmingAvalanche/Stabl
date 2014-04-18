@@ -25,7 +25,7 @@ evalPrintReturn str (stabl, dict) = case parseStabl "" str of Left err -> putStr
                                                                             in case result of Left err' -> putStrLn (show err') 
                                                                                                            >> return (stabl, dict)
                                                                                               Right (stabl', dict') -> putStrLn (show stabl') 
-                                                                                                                       >> return (stabl', dict)
+                                                                                                                       >> return (stabl', dict')
                                        
 emptyState = ([], Map.empty)
 

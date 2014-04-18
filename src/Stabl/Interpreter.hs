@@ -71,7 +71,7 @@ over [_] = Left $ StackUnderflow "over"
 over (x:y:xs) = Right $ y:x:y:xs
 
 apply :: [Stabl] -> Dict -> [Stabl] -> CanErr ([Stabl], Dict)
-apply stack dict quot = interpret ((reverse quot) ++ stack) dict
+apply stack dict quot = interpret (reverse quot ++ stack) dict
  
 -- TODO: fix to make total
 parseCheckAndInterpret :: String -> Dict -> CanErr ([Stabl], Dict)
@@ -84,7 +84,7 @@ parseCheckAndInterpret s dict = either
 interpret :: [Stabl] -> Dict -> CanErr ([Stabl], Dict)
 interpret s dict = interpret' (s, dict , [])
 
-interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr ([Stabl], Dict) -- return type should perhaps be CanErr ([Stabl], Dict) if I want the state of the dict after everything has been evaluated
+interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr ([Stabl], Dict)
 interpret' ([], dict, []) = Right ([], dict) 
 interpret' ([], dict, stack) = case (head stack) of
   LitInt num    -> Right (stack, dict)
@@ -117,14 +117,14 @@ interpret' (WordCall s : xs, dict, stack) =
             
             -- applying a quotation 
             -- OBS: all kode under dette bør kanskje refaktorerast
-            "apply"   -> case head' of Quotation quot -> apply quot dict tail' >>= \(res',dict') -> interpret' (xs, dict', res')
+            "apply"   -> case head' of Quotation quot -> apply quot dict tail' >>= \(res', dict') -> interpret' (xs, dict', res')
                                        other -> Left $ TypeMismatchErr {
                                          expected = "a quotation"
                                          , actual = "the word: " ++ show other}
               where head' = head stack
                     tail' = tail stack
             -- user-defined word                        
-            other   -> case lookup' of Just wordBody -> apply wordBody dict stack >>= (\(ret',dict') -> interpret' (xs, dict', ret'))
+            other   -> case lookup' of Just wordBody -> apply wordBody dict stack >>= \(ret', dict') -> interpret' (xs, dict', ret')
                                        Nothing       -> Left $ UndefinedWord other
               where lookup' = Map.lookup other dict
 
@@ -136,7 +136,7 @@ ifSuccessArithmetic stack retStack dict op = eval retStack op
                                              resApplyInterpret' (stack, dict)
 
 ifSuccessComb :: [Stabl] -> Dict -> [Stabl] -> ([Stabl] -> CanErr [Stabl]) -> CanErr ([Stabl], Dict)
-ifSuccessComb stack dict retStack comb = comb retStack -- stack combinator functions return CanErr [Stabl], so we need to "inject" the dict into the result of the function call
+ifSuccessComb stack dict retStack comb = comb retStack
                                          >>= 
                                          resApplyInterpret' (stack,dict)
 
