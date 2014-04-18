@@ -84,6 +84,7 @@ parseCheckAndInterpret s dict = either
 interpret :: [Stabl] -> Dict -> CanErr ([Stabl], Dict)
 interpret s dict = interpret' (s, dict , [])
 
+-- idé: refaktor til å bruke monad transformer? - EitherT State, noko sånt som det
 interpret' :: ([Stabl], Dict, [Stabl]) -> CanErr ([Stabl], Dict)
 interpret' ([], dict, []) = Right ([], dict) 
 interpret' ([], dict, stack) = case (head stack) of
