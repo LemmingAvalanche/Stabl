@@ -1,6 +1,7 @@
 module Interpreter
        (
-         parseCheckAndInterpret
+         parseAndInterpret
+       , parseCheckAndInterpret
        , interpret
        , apply
        , CanErr
@@ -20,7 +21,8 @@ data StablErr = StackUnderflow String
                     expected :: String
                   , actual :: String }
                 | UndefinedWord String
-                | Default String
+                | Default String 
+                  --- TODO? : deriving (Read,Show,Ord,Eq) -- ... more?
 
 instance Error StablErr where
   noMsg = Default "An error has occured"
@@ -72,6 +74,16 @@ over (x:y:xs) = Right $ y:x:y:xs
 
 apply :: [Stabl] -> Dict -> [Stabl] -> CanErr ([Stabl], Dict)
 apply stack dict quot = interpret (reverse quot ++ stack) dict
+
+{-
+Parse a raw string and return the output stack (or an error).x
+-}
+-- TODO: refaktorer denne og parseCheckAndInterpret
+parseAndInterpret :: String -> CanErr [Stabl]
+parseAndInterpret s = either 
+                      (Left . Parser) 
+                      (\prog -> fmap fst $ interpret prog Map.empty) 
+                      (parseStabl "" s)
  
 -- TODO: fix to make total
 parseCheckAndInterpret :: String -> Dict -> CanErr ([Stabl], Dict)
