@@ -127,6 +127,16 @@ interpret' (WordCall s : xs, dict, stack) =
             "swap"  -> ifSuccessComb xs dict stack swap 
             "rot"   -> ifSuccessComb xs dict stack rot
             "over"  -> ifSuccessComb xs dict stack over 
+
+            -- control flow
+            -- syntax: <flag> <if-branch> <else-branch> if (branches are represented as quotations)
+                              -- OBS: rett pattern-matching?
+            "if"    -> case stack of (Quotation elseBranch) : (Quotation ifBranch) : flag : rest -> if flag == (LitInt 1) -- true! 
+                                                                                                    then applyWithBranch ifBranch
+                                                                                                    else applyWithBranch elseBranch
+                                                                                                      where applyWithBranch branch = apply branch dict rest 
+                                                                                                                                     >>= \(res', dict') -> interpret' (xs, dict', res')       
+                                     _ -> Left $ TypeMismatchErr {expected = "well-formed if expression", actual = "not well-formed if expression"} -- TODO: give more useful error-message. 
             
             -- applying a quotation 
             -- OBS: all kode under dette bør kanskje refaktorerast
