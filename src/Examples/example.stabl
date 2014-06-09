@@ -1,0 +1,8 @@
+[
+  dup 0 eq
+  [ pop 1 ]
+  [ dup 1 minus fac mul ]
+  if
+] [fac] def
+
+5 fac

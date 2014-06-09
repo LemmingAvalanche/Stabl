@@ -1,3 +1,4 @@
+
 module Interpreter
        (
          parseAndInterpret
@@ -120,7 +121,12 @@ interpret' (WordCall s : xs, dict, stack) =
             "minus" -> ifSuccessArithmetic xs stack dict (-)
             "mul"   -> ifSuccessArithmetic xs stack dict (*)
             "div"   -> ifSuccessArithmetic xs stack dict div 
-              
+            
+            -- built-in comparators
+            "eq" -> ifSuccessArithmetic xs stack dict (eq) -- OBS: ved å bruke ifSuccess... så funker denne kun bå Integer, men den bør også funke på andre typer (some Char).
+            "gt" -> ifSuccessArithmetic xs stack dict (gt)
+            "lt" -> ifSuccessArithmetic xs stack dict (lt)
+
             -- built-in stack combinators 
             "pop"   -> ifSuccessComb xs dict stack pop 
             "dup"   -> ifSuccessComb xs dict stack dup 
@@ -152,6 +158,24 @@ interpret' (WordCall s : xs, dict, stack) =
               where lookup' = Map.lookup other dict
 
 -- TODO: move to where-clase in interpret'?
+
+-- TODO: rett rekkefølge på operatorane?
+eq :: Integer -> Integer -> Integer
+eq y x = if y == x then 1 else 0
+-- greater than 
+gt :: Integer -> Integer -> Integer
+gt y x = if y > x then 1 else 0
+-- less than
+lt y x = if y < x then 1 else 0
+
+
+-- Check if the two stack values have the same type: if they are both a wrapped int, a wrapped quotation, etc.
+sameType :: Stabl -> Stabl -> Bool
+sameType (LitInt _) (LitInt _) = True
+sameType (LitChar _) (LitChar _) = True
+sameType (Quotation _) (Quotation _) = True
+sameType (WordCall _) (WordCall _) = True
+sameType _ _ = False
 
 ifSuccessArithmetic :: [Stabl] -> [Stabl] -> Dict -> (Integer -> Integer -> Integer) -> CanErr ([Stabl], Dict)
 ifSuccessArithmetic stack retStack dict op = eval retStack op
