@@ -17,7 +17,7 @@ import Parser
 import Text.ParserCombinators.Parsec.Error
 
 data StablErr = StackUnderflow String
-                | Parser ParseError
+                | ParserErr ParseError
                 | TypeMismatchErr { 
                     expected :: String
                   , actual :: String }
@@ -32,7 +32,7 @@ instance Error StablErr where
 instance Show StablErr where
   show (StackUnderflow str) = "Stack underflow: the combinator " ++ 
                               str ++ " was called on the stack, but there were not enough elements on the stack."
-  show (Parser err) = show err
+  show (ParserErr err) = show err
   show (TypeMismatchErr exp act) = "Typemismatch error: expected " ++ exp ++ ", but got " ++ act
   show (UndefinedWord str) = "Undefined word error: tried to call word " ++ str ++ ", but it is not defined."
   show (Default str) = str
@@ -82,16 +82,40 @@ Parse a raw string and return the output stack (or an error).x
 -- TODO: refaktorer denne og parseCheckAndInterpret
 parseAndInterpret :: String -> CanErr [Stabl]
 parseAndInterpret s = either 
-                      (Left . Parser) 
+                      (Left . ParserErr) 
                       (\prog -> fmap fst $ interpret prog Map.empty) 
                       (parseStabl "" s)
  
 -- TODO: fix to make total
 parseCheckAndInterpret :: String -> Dict -> CanErr ([Stabl], Dict)
 parseCheckAndInterpret s dict = either
-                                (Left . Parser)
+                                (Left . ParserErr)
                                 (\prog -> interpret prog dict) 
                                 (parseStabl "" s)
+
+-- TODO: refactor (use applicative or functor)
+readFileParse :: FilePath -> IO (Either ParseError [Stabl])
+readFileParse path = do
+  prog <- readFile path
+  return $ parseStabl "" prog
+
+
+-- TODO: fix argument to the readFile word: should probably be a string, but strings are not part of the language as of yet. So for now it is wrapped in a quotation
+-- effectful (IO) interpreting: extends the interpret function with words to read programs from files.
+                                   -- Monad stack?
+interpret_io :: [Stabl] -> Dict -> IO (CanErr ([Stabl], Dict))
+-- built-in io word readFile
+interpret_io ((Quotation [WordCall path]):(WordCall "readFile"):stack) dict = do
+  prog <- readFileParse path
+  -- OBS: uses interpret, so the file that the program originates in can not use programs from other files!
+  let result = case prog of Left err -> Left $ ParserErr err -- TODO: refactor... 
+                            Right s -> interpret s dict  -- rett? (dict union dict')
+  case result of error@(Left _) -> return error
+                 Right (s',dict') -> interpret_io (s' ++ stack) dict' -- rett? (s' ++ stack)
+-- TODO: program the rest of the cases
+  
+
+-- TODO: make an interpret function that takes (Either ParseError [Stabl]) as input instead of [Stabl] ?
 
 -- | interpret a program given by a quotation.
 interpret :: [Stabl] -> Dict -> CanErr ([Stabl], Dict)

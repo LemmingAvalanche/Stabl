@@ -4,5 +4,3 @@
   [ dup 1 minus fac mul ]
   if
 ] [fac] def
-
-5 fac
