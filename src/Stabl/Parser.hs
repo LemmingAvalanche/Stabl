@@ -26,7 +26,7 @@ closeCollection = ")"
 -- TODO: implement
 openTuple = "{"
 closeTuple = "}" -- todo: change to somwething like < > instead...
--- Example: '{1 2 "boat" 4}' should translate into '[1 2 "boat" 4] tuple'. (assuming that "boat" is a string in the language").
+-- Example: '{1 2 "boat" 4}' should translate into '[1 2 "boat" 4] tuple'. (assuming that "boat" is a string in the language).
 
 -- TODO: implement
 -- TODO: should be able to nest?
