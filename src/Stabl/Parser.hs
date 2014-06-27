@@ -8,7 +8,7 @@ module Parser
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))
 import qualified Text.Parsec.Token as Token
-import Control.Applicative
+import Control.Applicative hiding (optional)
 
 -- def: removed as part of the grammar
 
@@ -69,9 +69,12 @@ collection :: Parser Quot
 collection = between (string openCollection) (string openCollection) sequenceStablToken
 
 -- | The usual integer
+-- See: https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/parsing-floats-with-parsec#parsing-integers-with-leading-sign
 int :: Parser Stabl
-int =     fmap (LitInt . read) (many1 digit)
-       <* notFollowedBy letter
+int = LitInt . read <$> (minus <|> number)
+           where minus  = (:) <$> char '-' <*> number 
+                 number = many1 digit
+                          <* notFollowedBy letter 
 
 -- Just a regular Char: 'e', for example
 char' :: Parser Stabl
