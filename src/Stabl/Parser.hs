@@ -79,7 +79,7 @@ int = LitInt . read <$> (minus <|> number)
 
 -- Just a regular Char: 'e', for example
 char' :: Parser Stabl
-char' = fmap LitChar (charDelimiter *> anyChar <* charDelimiter)
+char' = LitChar <$> (charDelimiter *> anyChar <* charDelimiter)
   where charDelimiter = char '\''
 
 -- | called "word prime" in order to be sure that it doesn't conflict
@@ -88,7 +88,7 @@ word' :: Parser Word
 word' = many1 alphaNum 
 
 wordCall :: Parser Stabl
-wordCall = fmap WordCall word' 
+wordCall = WordCall <$> word' 
 
 -- TODO: perhaps make the parser also accept strings that start with ':'. 
 term :: Parser Stabl -- forandre til Parser Stabl
@@ -97,15 +97,15 @@ term = Term <$> (upper <:> word') -- Note: 'upper' only parses upper ASCII chara
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error. 
 stablToken :: Parser Stabl
-stablToken =      (try int) 
+stablToken =      try int
               <|> char' 
               <|> term
               <|> wordCall
-              <|> (fmap Quotation quotation) -- OBS: la til char' nylig: ikkje testa med denne lagt til
+              <|> Quotation <$> quotation -- OBS: la til char' nylig: ikkje testa med denne lagt til
 
 sequenceStablToken :: Parser [Stabl]
 sequenceStablToken =    whitespace         
-                     *> (stablToken `sepBy` whitespace1)
+                     *> stablToken `sepBy` whitespace1
                      <* whitespace -- BUG: gives exception if there is whitespace at end of string 
 
 whitespace :: Parser String
