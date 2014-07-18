@@ -69,6 +69,8 @@ tuple = between (string openTuple) (string closeTuple) sequenceStablToken
 collection :: Parser Quot
 collection = between (string openCollection) (string openCollection) sequenceStablToken
 
+tick = '\''
+
 (<:>) = liftA2 (:)
 
 -- | The usual integer
@@ -82,12 +84,12 @@ int = LitInt . read <$> (minus <|> number)
 -- Just a regular Char: 'e', for example
 char' :: Parser Stabl
 char' = LitChar <$> (charDelimiter *> anyChar <* charDelimiter)
-  where charDelimiter = char '\''
+  where charDelimiter = char tick
 
 -- | called "word prime" in order to be sure that it doesn't conflict
 -- | with any function named "word" in Parsec.
 word' :: Parser Word
-word' = many1 alphaNum <* (notFollowedBy $ char '\'')
+word' = many1 alphaNum <* (notFollowedBy $ char tick)
 
 wordCall :: Parser Stabl
 wordCall = WordCall <$> word' 
