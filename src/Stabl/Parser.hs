@@ -69,11 +69,13 @@ tuple = between (string openTuple) (string closeTuple) sequenceStablToken
 collection :: Parser Quot
 collection = between (string openCollection) (string openCollection) sequenceStablToken
 
+(<:>) = liftA2 (:)
+
 -- | The usual integer
 -- See: https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/parsing-floats-with-parsec#parsing-integers-with-leading-sign
 int :: Parser Stabl
 int = LitInt . read <$> (minus <|> number)
-           where minus  = (:) <$> char '-' <*> number 
+           where minus  = char '-' <:> number 
                  number = many1 digit
                           <* notFollowedBy letter 
 
@@ -93,7 +95,7 @@ wordCall = WordCall <$> word'
 -- TODO: perhaps make the parser also accept strings that start with ':'. 
 term :: Parser Stabl -- forandre til Parser Stabl
 term = Term <$> (upper <:> word') -- Note: 'upper' only parses upper ASCII characters. 
-            where (<:>) = liftA2 (:)
+            
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error. 
 stablToken :: Parser Stabl
