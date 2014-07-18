@@ -97,11 +97,17 @@ wordCall = WordCall <$> word'
 -- TODO: perhaps make the parser also accept strings that start with ':'. 
 term :: Parser Stabl -- forandre til Parser Stabl
 term = Term <$> (upper <:> word') -- Note: 'upper' only parses upper ASCII characters. 
-            
+
+-- syntax: '<token>
+-- syntax sugar for: [token]
+-- example: 'word => [word]
+tickQuote :: Parser Stabl
+tickQuote = char tick *> (Quotation . pure <$> stablToken)
 
 -- | A token that can't be parsed as an int literal is assumed to be a word. If a token can't be parsed as an int, the lookahead fails without 1. consuming any input 2. propagating an error. 
-stablToken :: Parser Stabl
-stablToken =      try int
+stablToken :: Parser Stabl 
+stablToken =  tickQuote  -- NOTE: Is the tickQuote positioned well, here? Does it matter?
+              <|> try int
               <|> char' 
               <|> term
               <|> wordCall
