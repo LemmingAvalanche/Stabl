@@ -20,19 +20,26 @@ module Dict
        , popDictDef
        ) where
 
-import Data.Map as M
+import qualified Data.Map as M
+import Data.Maybe
 
 import Parser
 
-type InternalDict = M.Map String [Stabl]
+type InternalDict = M.Map String [[Stabl]]
 
 -- NOTE: use newtype instead?
 type Dict = ([String], InternalDict)
 
 pushDictDef :: String -> [Stabl] -> Dict -> Dict
-pushDictDef str prog (keyStack, internal) = (str:keyStack, M.insert str prog internal)
+pushDictDef str prog (keyStack, internal) = (str:keyStack, M.insert str (prog:rest) internal)
+              where rest = M.findWithDefault [] str internal
 
 -- | Pops the top key from the internal stack and removes the key and corresponding value from the internal dict. If the key stack is empty, Nothing is returned. 
 popDictDef :: Dict -> Maybe Dict
 popDictDef ([], _) = Nothing -- Empty keyStack: can not pop
-popDictDef (h:keyStack, internal) = Just (keyStack, M.delete h internal)
+popDictDef (k:keyStack, internal) = Just (keyStack, pop k internal)
+                                    where pop k int = if singleton $ fromJust $ M.lookup k int
+                                                      then M.delete k int
+                                                      else M.adjust tail k int
+                                                       where singleton [_] = True
+                                                             singleton _   = False
