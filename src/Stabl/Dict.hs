@@ -43,3 +43,7 @@ popDictDef (k:keyStack, internal) = Just (keyStack, pop k internal)
                                                       else M.adjust tail k int
                                                        where singleton [_] = True
                                                              singleton _   = False
+
+-- | The value that is returned is at the top of the stack which is associated with the key
+lookupDef :: String -> Dict -> Maybe [Stabl]
+lookupDef str (_, internal) = fmap head (M.lookup str internal)
