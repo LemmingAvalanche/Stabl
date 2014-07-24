@@ -28,7 +28,7 @@ import Parser
 
 type InternalDict = M.Map String [[Stabl]]
 
-type InternalDict2 = M.Map String [NonEmpty Stabl]
+type InternalDict2 = M.Map String [[Stabl]]
 
 -- NOTE: use newtype instead?
 type Dict = ([String], InternalDict)
