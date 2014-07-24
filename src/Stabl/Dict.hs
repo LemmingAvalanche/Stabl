@@ -17,7 +17,8 @@ module Dict
        (
          Dict
        , pushDictDef
-       , popDictDef
+       , popDictDef 
+       , lookupDef
        ) where
 
 import qualified Data.Map as M
@@ -26,6 +27,8 @@ import Data.Maybe
 import Parser
 
 type InternalDict = M.Map String [[Stabl]]
+
+type InternalDict2 = M.Map String [NonEmpty Stabl]
 
 -- NOTE: use newtype instead?
 type Dict = ([String], InternalDict)
