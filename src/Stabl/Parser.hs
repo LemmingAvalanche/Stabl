@@ -13,7 +13,7 @@ import Control.Applicative hiding (optional)
 
 -- def: removed as part of the grammar
 
-openQuot = ']'
+openQuot = '['
 closeQuot = ']'
 
 -- syntax sugar for collections
@@ -88,17 +88,21 @@ char' = LitChar <$> (charDelimiter *> anyChar <* charDelimiter)
   where charDelimiter = char tick
 
 -- | Parser for legal Chars that can occur in a word
-legalWordChars = noneOf [ openQuot
+legalWordChar :: Parser Char
+legalWordChar = noneOf [ openQuot
                         , closeQuot
                         , openCollection
                         , closeCollection 
                         , tick
+                        -- whitespace:
+                        , ' '
+                        , '\n'
                         ]
 
 -- | called "word prime" in order to be sure that it doesn't conflict
 -- | with any function named "word" in Parsec.
 word' :: Parser Word
-word' = many1 legalWordChars <* (notFollowedBy $ char tick)
+word' = many1 legalWordChar <* (notFollowedBy $ char tick)
 
 wordCall :: Parser Stabl
 wordCall = WordCall <$> word' 
