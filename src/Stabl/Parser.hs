@@ -12,27 +12,27 @@ import Control.Applicative hiding (optional)
 
 -- def: removed as part of the grammar
 
-openQuot = "["
-closeQuot = "]"
+openQuot = ']'
+closeQuot = ']'
 
 -- syntax sugar for collections
 -- TODO: implement
 -- NOTE: the only collection used should just be (homogenous?) list, for the time being
-openCollection = "("
-closeCollection = ")"
+openCollection = '('
+closeCollection = ')'
 -- Example: '(1 2 3 4)' should translate into '[1 2 3 4] list' (for now: might want to be polymorphic in the collection type).
 
 -- syntax sugar for tuples
 -- TODO: implement
-openTuple = "{"
-closeTuple = "}" -- todo: change to somwething like < > instead...
+openTuple = '{'
+closeTuple = '}' -- todo: change to somwething like < > instead...
 -- Example: '{1 2 "boat" 4}' should translate into '[1 2 "boat" 4] tuple'. (assuming that "boat" is a string in the language).
 
 -- TODO: implement
 -- TODO: should be able to nest?
 -- IDEA: have '/' built-in to the grammar of this as a an escape character? That way you can nest these things, or use « in it as a literal by using \«, as you please.
-openMinceQuote = "«"
-closeMinceQuote = "»"
+openMinceQuote = '«'
+closeMinceQuote = '»'
 
 type Word = String
 -- quotation. see: cat-lang
@@ -61,13 +61,13 @@ instance Show Stabl where
 
 
 quotation :: Parser Quot
-quotation = between (string openQuot) (string closeQuot) sequenceStablToken
+quotation = between (char openQuot) (char closeQuot) sequenceStablToken
 
 tuple :: Parser Quot
-tuple = between (string openTuple) (string closeTuple) sequenceStablToken
+tuple = between (char openTuple) (char closeTuple) sequenceStablToken
 
 collection :: Parser Quot
-collection = between (string openCollection) (string openCollection) sequenceStablToken
+collection = between (char openCollection) (char openCollection) sequenceStablToken
 
 tick = '\''
 
@@ -86,10 +86,18 @@ char' :: Parser Stabl
 char' = LitChar <$> (charDelimiter *> anyChar <* charDelimiter)
   where charDelimiter = char tick
 
+-- | Parser for legal Chars that can occur in a word
+legalWordChars = noneOf [ openQuot
+                        , closeQuot
+                        , openCollection
+                        , closeCollection 
+                        , tick
+                        ]
+
 -- | called "word prime" in order to be sure that it doesn't conflict
 -- | with any function named "word" in Parsec.
 word' :: Parser Word
-word' = many1 anyChar <* (notFollowedBy $ char tick)
+word' = many1 legalWordChars <* (notFollowedBy $ char tick)
 
 wordCall :: Parser Stabl
 wordCall = WordCall <$> word' 
