@@ -89,7 +89,7 @@ char' = LitChar <$> (charDelimiter *> anyChar <* charDelimiter)
 -- | called "word prime" in order to be sure that it doesn't conflict
 -- | with any function named "word" in Parsec.
 word' :: Parser Word
-word' = many1 alphaNum <* (notFollowedBy $ char tick)
+word' = many1 anyChar <* (notFollowedBy $ char tick)
 
 wordCall :: Parser Stabl
 wordCall = WordCall <$> word' 
