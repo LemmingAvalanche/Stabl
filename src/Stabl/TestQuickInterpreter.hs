@@ -16,4 +16,4 @@ prop_arith_minus x y = helper_arith1 x y (-) "-"
 prop_arith_mul x y = helper_arith1 x y (*) "*"
 prop_arith_div x y = if y /= 0 
                      then helper_arith1 x y div "/"
-                     else True -- How should I deal with tests failing because of division by zero?
+                     else True 
