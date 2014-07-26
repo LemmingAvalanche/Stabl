@@ -1,6 +1,6 @@
 [
-  dup 0 eq
+  dup 0 ==
   [ pop 1 ]
-  [ dup 1 minus fac mul ]
+  [ dup 1 - fac * ]
   if
 ] [fac] def

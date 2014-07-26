@@ -141,15 +141,15 @@ interpret' (WordCall s : xs, dict, stack) =
                               actual = "the rest of the stack: " ++ show stack} 
             -- built-in words
             -- OBS: fortsatt bug her? eller fiksa eg alt som var gale her?
-            "add"   -> ifSuccessArithmetic xs stack dict (+)
-            "minus" -> ifSuccessArithmetic xs stack dict (-)
-            "mul"   -> ifSuccessArithmetic xs stack dict (*)
-            "div"   -> ifSuccessArithmetic xs stack dict div 
+            "+"   -> ifSuccessArithmetic xs stack dict (+)
+            "-" -> ifSuccessArithmetic xs stack dict (-)
+            "*"   -> ifSuccessArithmetic xs stack dict (*)
+            "/"   -> ifSuccessArithmetic xs stack dict div 
             
             -- built-in comparators
-            "eq" -> ifSuccessArithmetic xs stack dict (eq) -- OBS: ved å bruke ifSuccess... så funker denne kun bå Integer, men den bør også funke på andre typer (some Char).
-            "gt" -> ifSuccessArithmetic xs stack dict (gt)
-            "lt" -> ifSuccessArithmetic xs stack dict (lt)
+            "==" -> ifSuccessArithmetic xs stack dict (eq) -- OBS: ved å bruke ifSuccess... så funker denne kun bå Integer, men den bør også funke på andre typer (some Char).
+            ">" -> ifSuccessArithmetic xs stack dict (gt)
+            "<" -> ifSuccessArithmetic xs stack dict (lt)
 
             -- built-in stack combinators 
             "pop"   -> ifSuccessComb xs dict stack pop 
