@@ -99,17 +99,20 @@ parseCheckAndInterpret s dict = either
                                    -- Monad stack?
 -- TODO: non-exhaustive number of cases. I should add the rest (which should just be a "wrapper" for calling pure (non-IO) words).
 interpret_io :: [Stabl] -> Dict -> IO (CanErr ([Stabl], Dict))
+interpret_io s dict = interpret_io' (s, dict, [])
+
 -- built-in io word readFile
-interpret_io ((Quotation [WordCall path]):(WordCall "readFile"):stack) dict = do
+interpret_io' :: ([Stabl], Dict, [Stabl]) -> IO (CanErr ([Stabl], Dict))
+interpret_io' (((Quotation [WordCall path]):(WordCall "readFile"):rest), dict, stack) = do
   prog <- parseFile path
   -- OBS: uses interpret, so the file that the program originates in can not use programs from other files!
   let result = case prog of Left err -> Left $ ParserErr err -- TODO: refactor... 
-                            Right s -> interpret s dict  -- rett? (dict union dict')
+                            Right result -> interpret result dict  -- Since this uses a pure function, this means that effectful - such as reading a file - can't be called *inside a file*. This might not be useful for my purposes, anyway, but it's something that should be kept in mind. 
   case result of error@(Left _) -> return error
-                 Right (s',dict') -> interpret_io (s' ++ stack) dict' -- rett? (s' ++ stack)
+                 Right (stack', dict') -> interpret_io' (rest, dict', stack')
 -- TODO: program the rest of the cases
+interpret_io' (stack, dict, retStack) = error "Not implemented yet!!"
   
-
 -- TODO: make an interpret function that takes (Either ParseError [Stabl]) as input instead of [Stabl] ?
 
 -- | interpret a program given by a quotation.
@@ -225,5 +228,3 @@ eval stack op = let x = top stack
 
 
  
-                                                
-  
