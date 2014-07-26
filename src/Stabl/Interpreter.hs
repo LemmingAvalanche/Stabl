@@ -95,7 +95,9 @@ parseCheckAndInterpret s dict = either
 
 -- TODO: fix argument to the readFile word: should probably be a string, but strings are not part of the language as of yet. So for now it is wrapped in a quotation
 -- effectful (IO) interpreting: extends the interpret function with words to read programs from files.
+
                                    -- Monad stack?
+-- TODO: non-exhaustive number of cases. I should add the rest (which should just be a "wrapper" for calling pure (non-IO) words).
 interpret_io :: [Stabl] -> Dict -> IO (CanErr ([Stabl], Dict))
 -- built-in io word readFile
 interpret_io ((Quotation [WordCall path]):(WordCall "readFile"):stack) dict = do
