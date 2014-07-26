@@ -1,6 +1,1 @@
-[
-  dup 0 ==
-  [ pop 1 ]
-  [ dup 1 - fac * ]
-  if
-] [fac] def
+[dup 0 == [pop 1] [dup 1 - fac *] if] 'fac def
