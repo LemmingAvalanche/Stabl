@@ -4,6 +4,7 @@ module Parser
        , Quot
        , parseStabl
        , parseStablUnsafely
+       , parseFile
        ) where
 
 import Text.ParserCombinators.Parsec hiding (many, (<|>))
@@ -137,3 +138,6 @@ parseStabl = parse sequenceStablToken
 
 parseStablUnsafely :: String -> [Stabl]
 parseStablUnsafely str = case parseStabl "" str of Right expr -> expr
+
+parseFile :: String -> IO (Either ParseError [Stabl])
+parseFile = parseFromFile sequenceStablToken

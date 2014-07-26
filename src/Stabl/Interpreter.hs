@@ -93,20 +93,13 @@ parseCheckAndInterpret s dict = either
                                 (\prog -> interpret prog dict) 
                                 (parseStabl "" s)
 
--- TODO: refactor (use applicative or functor)
-readFileParse :: FilePath -> IO (Either ParseError [Stabl])
-readFileParse path = do
-  prog <- readFile path
-  return $ parseStabl "" prog
-
-
 -- TODO: fix argument to the readFile word: should probably be a string, but strings are not part of the language as of yet. So for now it is wrapped in a quotation
 -- effectful (IO) interpreting: extends the interpret function with words to read programs from files.
                                    -- Monad stack?
 interpret_io :: [Stabl] -> Dict -> IO (CanErr ([Stabl], Dict))
 -- built-in io word readFile
 interpret_io ((Quotation [WordCall path]):(WordCall "readFile"):stack) dict = do
-  prog <- readFileParse path
+  prog <- parseFile path
   -- OBS: uses interpret, so the file that the program originates in can not use programs from other files!
   let result = case prog of Left err -> Left $ ParserErr err -- TODO: refactor... 
                             Right s -> interpret s dict  -- rett? (dict union dict')
