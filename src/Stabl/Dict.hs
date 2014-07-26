@@ -23,30 +23,32 @@ module Dict
 
 import qualified Data.Map as M
 import Data.Maybe
+import Data.List.NonEmpty
 
 import Parser
 
-type InternalDict = M.Map String [[Stabl]]
-
-type InternalDict2 = M.Map String [[Stabl]]
+type InternalDict = M.Map String (NonEmpty [Stabl])
 
 -- NOTE: use newtype instead?
 type Dict = ([String], InternalDict)
 
 pushDictDef :: String -> [Stabl] -> Dict -> Dict
-pushDictDef str prog (keyStack, internal) = (str:keyStack, M.insert str (prog:rest) internal)
-              where rest = M.findWithDefault [] str internal
-
+pushDictDef str prog (keyStack, internal) = (str:keyStack
+                                             , M.insert str (NonEmpty prog rest) internal)
+                               where rest = maybe 
+                                            [] 
+                                            nonEmptyToList 
+                                            (M.lookup str internal)
+           
 -- | Pops the top key from the internal stack and removes the key and corresponding value from the internal dict. If the key stack is empty, Nothing is returned. 
 popDictDef :: Dict -> Maybe Dict
 popDictDef ([], _) = Nothing -- Empty keyStack: can not pop
 popDictDef (k:keyStack, internal) = Just (keyStack, pop k internal)
-                                    where pop k int = if singleton $ fromJust $ M.lookup k int
-                                                      then M.delete k int
-                                                      else M.adjust tail k int
-                                                       where singleton [_] = True
-                                                             singleton _   = False
+                                          -- invariant: as long as a String str exists on the stack of keys, there should also be a corresponding key and value in the internal Map. So using fromJust here is fine. 
+                           where pop k inter = case neTail $ fromJust $ M.lookup k inter of
+                                                    [] -> M.delete k inter
+                                                    (first:rest) -> M.insert k (NonEmpty first rest) inter
 
 -- | The value that is returned is at the top of the stack which is associated with the key
 lookupDef :: String -> Dict -> Maybe [Stabl]
-lookupDef str (_, internal) = fmap head (M.lookup str internal)
+lookupDef str (_, internal) = fmap neHead (M.lookup str internal)
