@@ -1,7 +1,0 @@
-Date: 26.07.2014
-
-Parser.hs: Parser is broken, probably as a consequence of the change from parsing words as a sequence of alphaNum chars to a sequence of any char that is not chars like '[', ']', etc. See commit:
-
-https://github.com/LemmingAvalanche/Stabl/commit/9822c4b40629fba2d8b8aa205b11071d3af50411
-
-Now, when trying to parse stabl experession, the parser will store characters like ']' as words, while it really should parse them as containing quotations. 
