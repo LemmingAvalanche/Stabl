@@ -1,1 +1,4 @@
+[over over] '2dup def
+[[pop] [swap pop] if] 'first-orelse-second def
+[2dup > first-orelse-second] 'max def
 [dup 0 == [pop 1] [dup 1 - fac *] if] 'fac def
