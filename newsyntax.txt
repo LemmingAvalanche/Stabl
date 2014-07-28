@@ -31,18 +31,16 @@ fst <-
 "This is $fst, everybody!" 
 ] 'present def
 
-# String med interpolation der ein kan utføre ord _inne i_ strengen! :
+#String with interpolation where one can execute wrods _inside of_ the string.
 
 [
 "This is $pop, everybody!"
 ] 'present def
 
 
-# def med type declaration:
+# def with type declaration:
 
 [[Num] [Num] ->] decl
 [dup *] 'sqr def
 
 [Num] [Num] -> # words pops one Num from the stack, and returns a new Num. 
-
-# ide: ting som begynner med store bokstavar er "terms"? Og ein implementerer type-sjekking ved å bruke terms som typer? 
