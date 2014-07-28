@@ -17,6 +17,7 @@ helper_arith1 x y op opString = let expr = show x ++ " " ++ show y ++ " " ++ opS
                                     actual = parseAndInterpret expr 
                                 in check expected actual
 
+-- TODO: add these string representations (e.g. "+") as values in the Interpreter module, like was done with the stack combinators recently. 
 prop_arith_add x y = helper_arith1 x y (+) "+"
 prop_arith_minus x y = helper_arith1 x y (-) "-"
 prop_arith_mul x y = helper_arith1 x y (*) "*"
@@ -38,6 +39,17 @@ prop_dup_pop1 x = let expr = show x ++ _sdup ++ _spop
                       expected = [LitInt x]
                       actual = parseAndInterpret expr
                   in check expected actual
+
+prop_apply_arith :: Integer -> Integer -> Bool
+prop_apply_arith x y = let expr = show x ++ " [" ++ show y ++ " -]" ++ _sapply -- x [y -] apply
+                           expected = [LitInt $ x - y]
+                           actual = parseAndInterpret expr
+                       in check expected actual
+ 
+
+
+
+
 
 
 
