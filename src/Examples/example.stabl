@@ -1,4 +1,11 @@
+[Comment: duplicate the two values at the top of the stack] pop
 [over over] '2dup def
+
+[Comment: Consumes a topmost flag and two values beneath that flag and pushes the third value on the stack if the flag was true, or pushes the second value on the stack if the flag was false] pop
 [[pop] [swap pop] if] 'first-orelse-second def
+
+[Comment: Consumes two integers and pushes on the integer that was largest] pop
 [2dup > first-orelse-second] 'max def
+
+[Comment: factorial] pop
 [dup 0 == [pop 1] [dup 1 - fac *] if] 'fac def
