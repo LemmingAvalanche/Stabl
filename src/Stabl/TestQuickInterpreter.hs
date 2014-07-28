@@ -26,9 +26,18 @@ prop_arith_div x y = if y /= 0
 
 -- Combinators
 
-prop_pop1 :: Int -> Bool
+prop_pop1 :: Integer -> Bool
 prop_pop1 x = let expr = show x ++ _spop
                   expected = []
                   actual = parseAndInterpret expr
               in check expected actual
-                                
+
+-- 'dup pop' is identity
+prop_dup_pop1 :: Integer -> Bool
+prop_dup_pop1 x = let expr = show x ++ _sdup ++ _spop
+                      expected = [LitInt x]
+                      actual = parseAndInterpret expr
+                  in check expected actual
+
+
+
