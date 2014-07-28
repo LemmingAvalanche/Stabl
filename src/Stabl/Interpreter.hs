@@ -96,10 +96,10 @@ String-representation of built-in stack combinators. Intended to be provided her
 
 spop = "pop"
 sdup = "dup"
-sswap = "sswap"
-srot = "srot"
-sover = "sover"
-sapply = "sapply"
+sswap = "swap"
+srot = "rot"
+sover = "over"
+sapply = "apply"
 
 -- Prepended with whitespace. This makes testing easier, for example: _spop ++ _sdup ++ _spop, instead of: spop ++ " " ++ _sdup ++ " " ++ _spop
 
