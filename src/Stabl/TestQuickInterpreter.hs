@@ -26,15 +26,8 @@ prop_arith_div x y = if y /= 0
 
 -- Combinators
 
--- TODO: add these strings to Interpreter.hs instead and export them as part of the module.
-pop = "pop"
-dup = "dup"
-swap = "swap"
-rot = "rot"
-over = "over"
-
 prop_pop1 :: Int -> Bool
-prop_pop1 x = let expr = show x ++ " " ++ pop
+prop_pop1 x = let expr = show x ++ _spop
                   expected = []
                   actual = parseAndInterpret expr
               in check expected actual

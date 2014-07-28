@@ -7,6 +7,18 @@ module Interpreter
        , apply
        , CanErr
        , Dict
+       , spop
+       , sdup
+       , sswap
+       , srot
+       , sover
+       , sapply
+       , _spop
+       , _sdup
+       , _sswap
+       , _srot
+       , _sover
+       , _sapply
        ) where
 import Control.Applicative
 import Control.Monad
@@ -76,8 +88,34 @@ over (x:y:xs) = Right $ y:x:y:xs
 apply :: [Stabl] -> Dict -> [Stabl] -> CanErr ([Stabl], Dict)
 apply stack dict quot = interpret (reverse quot ++ stack) dict
 
+{-  
+String-representation of built-in stack combinators. Intended to be provided here in order to export as part of the module and avoid error-prone duplication, for example the String "dup" showing up many different places in the codebase.
+-}
+
+-- NOTE: this looks like something that could be more succinctly solved with something like TemplateHaskell. But then I would have first have to learn TemplateHaskel...
+
+spop = "pop"
+sdup = "dup"
+sswap = "sswap"
+srot = "srot"
+sover = "sover"
+sapply = "sapply"
+
+-- Prepended with whitespace. This makes testing easier, for example: _spop ++ _sdup ++ _spop, instead of: spop ++ " " ++ _sdup ++ " " ++ _spop
+
+w_space = (' ':)
+
+_spop = w_space spop
+_sdup = w_space sdup
+_sswap = w_space sswap
+_srot = w_space srot
+_sover = w_space sover
+_sapply = w_space sapply
+
+{- END string-representation of buil-ins -}
+
 {-
-Parse a raw string and return the output stack (or an error).x
+Parse a raw string and return the output stack (or an error).
 -}
 -- TODO: refaktorer denne og parseCheckAndInterpret
 parseAndInterpret :: String -> CanErr [Stabl]
