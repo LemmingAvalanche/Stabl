@@ -13,7 +13,7 @@ check expected = either
 
 helper_arith1 :: Integer -> Integer -> (Integer -> Integer -> Integer) -> String -> Bool
 helper_arith1 x y op opString = let expr = show x ++ " " ++ show y ++ " " ++ opString 
-                                    expected = LitInt $ x `op` x
+                                    expected = LitInt $ x `op` y
                                     actual = fmap head $ parseAndInterpret expr 
                                 in check expected actual
 
