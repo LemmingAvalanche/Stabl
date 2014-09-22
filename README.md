@@ -8,4 +8,4 @@ TODO
 Background
 ----
 
-This was originally a term project in the course INF225 (fall 2014) at the University of Bergen. The project was then (loosely) about making a Forth-like language. 
+This was originally a term project in the course INF225 (fall 2013) at the University of Bergen. The project was then (loosely) about making a Forth-like language. 
